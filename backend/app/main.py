@@ -2,7 +2,7 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
-from app.routers import auth, users, dashboard, trips
+from app.routers import auth, users, dashboard, trips, sections, cities, activities, checklist, notes, invoice, community
 
 app = FastAPI(title="Traveloop API", version="1.0.0")
 
@@ -18,6 +18,13 @@ app.include_router(auth.router, prefix="/api/v1")
 app.include_router(users.router, prefix="/api/v1")
 app.include_router(trips.router, prefix="/api/v1")
 app.include_router(dashboard.router, prefix="/api/v1")
+app.include_router(sections.router, prefix="/api/v1")
+app.include_router(cities.router, prefix="/api/v1")
+app.include_router(activities.router, prefix="/api/v1")
+app.include_router(checklist.router, prefix="/api/v1")
+app.include_router(notes.router, prefix="/api/v1")
+app.include_router(invoice.router, prefix="/api/v1")
+app.include_router(community.router, prefix="/api/v1")
 
 
 @app.get("/health")

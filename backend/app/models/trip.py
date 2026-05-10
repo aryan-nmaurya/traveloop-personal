@@ -22,3 +22,6 @@ class Trip(Base):
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 
     user = relationship("User", back_populates="trips")
+    sections = relationship("TripSection", back_populates="trip", cascade="all, delete-orphan", order_by="TripSection.order_index")
+    checklist_items = relationship("ChecklistItem", back_populates="trip", cascade="all, delete-orphan")
+    notes = relationship("TripNote", back_populates="trip", cascade="all, delete-orphan")

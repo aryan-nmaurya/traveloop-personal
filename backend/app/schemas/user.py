@@ -19,6 +19,16 @@ class UserResponse(BaseModel):
     model_config = {"from_attributes": True}
 
 
+class UserUpdate(BaseModel):
+    first_name: str | None = None
+    last_name: str | None = None
+    phone: str | None = None
+    city: str | None = None
+    country: str | None = None
+    profile_photo_url: str | None = None
+    language_pref: str | None = None
+
+
 class SignupResponse(BaseModel):
     access_token: str
     refresh_token: str
