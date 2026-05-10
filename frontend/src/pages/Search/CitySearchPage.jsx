@@ -3,7 +3,9 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import AppLayout from '../../components/layout/AppLayout';
 import api from '../../api/axiosInstance';
 import { Button, EmptyState, PageIntro, PageSection, SearchField, Toolbar } from '../../components/ui/primitives';
-import { cityDirectory } from '../../data/mockData';
+import { cityDirectory, coverFallback } from '../../data/mockData';
+
+const resolveImage = (url) => url || coverFallback;
 
 const CitySearchPage = () => {
   const [query, setQuery] = useState('');
@@ -87,7 +89,13 @@ const CitySearchPage = () => {
               key={city.id}
               className="overflow-hidden rounded-[30px] border border-white/80 bg-white/92 shadow-[0_22px_70px_rgba(15,23,42,0.08)] transition duration-300 hover:-translate-y-1.5 hover:shadow-[0_30px_90px_rgba(15,23,42,0.12)]"
             >
-              <img alt={city.name} className="h-64 w-full object-cover" src={city.image_url} />
+              <img
+                alt={city.name}
+                className="h-64 w-full object-cover"
+                src={resolveImage(city.image_url)}
+                loading="lazy"
+                onError={(e) => { e.currentTarget.src = coverFallback; }}
+              />
               <div className="space-y-4 p-5">
                 <div className="flex items-start justify-between gap-3">
                   <div>

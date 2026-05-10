@@ -108,158 +108,175 @@ const CreateTripPage = () => {
         title="Plan a new trip"
       />
 
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,1.2fr)_380px]">
-        <PageSection className="order-2 xl:order-1">
-          <SectionHeader
-            eyebrow="Trip form"
-            title="Set the trip structure first"
-            description="Choose the place, dates, cover, group size, and target budget before you move into day-by-day sections."
-          />
+      <div className="flex flex-col gap-10">
+        <div className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_420px]">
+          {/* ── Trip Form ── */}
+          <PageSection className="order-2 xl:order-1">
+            <SectionHeader
+              eyebrow="Trip details"
+              title="Set the trip structure"
+              description="Choose the place, dates, cover, group size, and target budget before you move into day-by-day sections."
+            />
 
-          <form className="grid gap-5 md:grid-cols-2" onSubmit={handleSubmit}>
-            <FormField className="md:col-span-2" icon={Sparkles} label="Trip title">
-              <input
-                name="name"
-                onChange={handleChange}
-                placeholder="Mediterranean Summer Circuit"
-                required
-                value={formData.name}
-              />
-            </FormField>
+            <form className="grid gap-6 md:grid-cols-2" onSubmit={handleSubmit}>
+              <FormField className="md:col-span-2" icon={Sparkles} label="Trip title">
+                <input
+                  name="name"
+                  onChange={handleChange}
+                  placeholder="Mediterranean Summer Circuit"
+                  required
+                  value={formData.name}
+                />
+              </FormField>
 
-            <FormField icon={MapPin} label="Select a place">
-              <select name="destination" onChange={handleChange} value={formData.destination}>
-                {cities.map((city) => (
-                  <option key={city.id} value={city.name}>
-                    {city.name}, {city.country}
-                  </option>
-                ))}
-              </select>
-            </FormField>
+              <FormField icon={MapPin} label="Select a place">
+                <select name="destination" onChange={handleChange} value={formData.destination}>
+                  {cities.map((city) => (
+                    <option key={city.id} value={city.name}>
+                      {city.name}, {city.country}
+                    </option>
+                  ))}
+                </select>
+              </FormField>
 
-            <FormField hint="Touch friendly" icon={Users} label="Travelers">
-              <input min="1" name="travelers" onChange={handleChange} type="number" value={formData.travelers} />
-            </FormField>
+              <FormField hint="Touch friendly" icon={Users} label="Travelers">
+                <input min="1" name="travelers" onChange={handleChange} type="number" value={formData.travelers} />
+              </FormField>
 
-            <FormField icon={Calendar} label="Start date">
-              <input name="startDate" onChange={handleChange} required type="date" value={formData.startDate} />
-            </FormField>
+              <FormField icon={Calendar} label="Start date">
+                <input name="startDate" onChange={handleChange} required type="date" value={formData.startDate} />
+              </FormField>
 
-            <FormField icon={Calendar} label="End date">
-              <input name="endDate" onChange={handleChange} required type="date" value={formData.endDate} />
-            </FormField>
+              <FormField icon={Calendar} label="End date">
+                <input name="endDate" onChange={handleChange} required type="date" value={formData.endDate} />
+              </FormField>
 
-            <FormField icon={PiggyBank} label="Budget target">
-              <input min="0" name="budget" onChange={handleChange} step="100" type="number" value={formData.budget} />
-            </FormField>
+              <FormField icon={PiggyBank} label="Budget target">
+                <input min="0" name="budget" onChange={handleChange} step="100" type="number" value={formData.budget} />
+              </FormField>
 
-            <FormField icon={Globe2} label="Cover image URL">
-              <input name="coverPhoto" onChange={handleChange} type="url" value={formData.coverPhoto} />
-            </FormField>
+              <FormField icon={Globe2} label="Cover image URL">
+                <input name="coverPhoto" onChange={handleChange} type="url" value={formData.coverPhoto} />
+              </FormField>
 
-            <FormField className="md:col-span-2" icon={Text} label="Trip brief" shellClassName="items-start">
-              <textarea
-                name="description"
-                onChange={handleChange}
-                placeholder="Describe the mood, pace, and must-have stops for the journey."
-                rows="5"
-                value={formData.description}
-              />
-            </FormField>
+              <FormField className="md:col-span-2" icon={Text} label="Trip brief" shellClassName="items-start rounded-[24px] py-1">
+                <textarea
+                  className="w-full bg-transparent border-0 outline-none"
+                  name="description"
+                  onChange={handleChange}
+                  placeholder="Describe the mood, pace, and must-have stops for the journey."
+                  rows="5"
+                  value={formData.description}
+                />
+              </FormField>
 
-            <label className="md:col-span-2 flex items-center gap-3 rounded-[24px] border border-slate-200/80 bg-slate-50/90 px-4 py-4 text-sm text-slate-700">
-              <input checked={formData.isPublic} name="isPublic" onChange={handleChange} type="checkbox" />
-              Make this trip public in the community gallery once it is polished.
-            </label>
+              <label className="md:col-span-2 flex items-center gap-3 rounded-[24px] border border-slate-200/80 bg-slate-50/90 px-4 py-4 text-sm text-slate-700 dark:bg-slate-800/50 dark:border-slate-700/60 dark:text-slate-300">
+                <input checked={formData.isPublic} name="isPublic" onChange={handleChange} type="checkbox" />
+                Make this trip public in the community gallery once it is polished.
+              </label>
 
-            <div className="md:col-span-2 flex flex-wrap gap-3">
-              <Button type="submit">{loading ? 'Creating...' : 'Create trip and continue'}</Button>
-              <Button to="/trips" variant="secondary">
-                Cancel
-              </Button>
-            </div>
-          </form>
-        </PageSection>
-
-        <div className="order-1 flex flex-col gap-6 xl:order-2">
-          <PageSection className="overflow-hidden p-0">
-            <div className="relative h-80">
-              <img alt="Trip preview" className="h-full w-full object-cover" src={formData.coverPhoto || coverFallback} />
-              <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(15,23,42,0.04),rgba(15,23,42,0.65))]" />
-              <div className="absolute inset-x-5 bottom-5 space-y-3 text-white">
-                <Eyebrow className="border-white/16 bg-white/16 text-white">Live preview</Eyebrow>
-                <div>
-                  <h2 className="text-3xl font-semibold tracking-[-0.04em]">{formData.name || 'Your trip title'}</h2>
-                  <p className="mt-2 text-sm leading-6 text-white/78">
-                    {formData.description || 'A premium summary of the trip will appear here as you write it.'}
-                  </p>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  <InfoBadge className="border-white/20 bg-white/12 text-white">{selectedCity.name}</InfoBadge>
-                  <InfoBadge className="border-white/20 bg-white/12 text-white">{formatCurrency(formData.budget)}</InfoBadge>
-                  <InfoBadge className="border-white/20 bg-white/12 text-white">{formData.travelers} travelers</InfoBadge>
-                </div>
+              <div className="md:col-span-2 flex flex-wrap gap-3 pt-2">
+                <Button size="lg" type="submit">{loading ? 'Creating...' : 'Create trip and continue'}</Button>
+                <Button size="lg" to="/trips" variant="secondary">
+                  Cancel
+                </Button>
               </div>
-            </div>
+            </form>
           </PageSection>
 
-          <PageSection>
-            <SectionHeader
-              action={
-                <div className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-700"
-                    onClick={() => moveSuggestions('prev')}
-                  >
-                    <ArrowLeft size={16} />
-                  </button>
-                  <button
-                    type="button"
-                    className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-700"
-                    onClick={() => moveSuggestions('next')}
-                  >
-                    <ArrowRight size={16} />
-                  </button>
-                </div>
-              }
-              eyebrow="Suggestions"
-              title="Strong starting points"
-              description="A horizontal inspiration carousel instead of a long vertical stack, matching the requested premium behavior."
-            />
-            <div className="hide-scrollbar -mx-1 flex gap-4 overflow-x-auto px-1 pb-2" ref={suggestionRail}>
-              {cities.map((city) => (
-                <button
-                  key={city.id}
-                  type="button"
-                  className="min-w-[260px] overflow-hidden rounded-[26px] border border-white/80 bg-white text-left shadow-[0_18px_50px_rgba(15,23,42,0.08)] transition hover:-translate-y-1"
-                  onClick={() =>
-                    setFormData((current) => ({
-                      ...current,
-                      destination: city.name,
-                      coverPhoto: city.image_url,
-                    }))
-                  }
-                >
-                  <img alt={city.name} className="h-40 w-full object-cover" src={city.image_url} />
-                  <div className="space-y-3 p-4">
-                    <div>
-                      <h3 className="text-xl font-semibold tracking-[-0.04em] text-slate-950">{city.name}</h3>
-                      <p className="mt-1 text-sm text-[var(--text-secondary)]">
-                        {city.country} • {city.region}
+          {/* ── Live Preview ── */}
+          <div className="order-1 xl:order-2">
+            <div className="sticky top-10">
+              <article className="surface-card overflow-hidden">
+                <div className="relative h-[480px]">
+                  <img alt="Trip preview" className="h-full w-full object-cover transition-opacity duration-500" src={formData.coverPhoto || coverFallback} onError={(e) => { e.currentTarget.src = coverFallback; }} />
+                  <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(15,23,42,0.1),rgba(15,23,42,0.92))]" />
+                  <div className="absolute inset-x-7 bottom-8 space-y-5 text-white">
+                    <Eyebrow className="border-white/25 bg-black/30 text-white backdrop-blur-md shadow-lg">Live preview</Eyebrow>
+                    <div className="space-y-3">
+                      <h2 className="text-4xl font-semibold tracking-[-0.04em] leading-[1.1]">{formData.name || 'Your trip title'}</h2>
+                      <p className="text-base leading-7 text-white/80 line-clamp-4">
+                        {formData.description || 'A premium summary of the trip will appear here as you write it.'}
                       </p>
                     </div>
-                    <p className="text-sm leading-6 text-[var(--text-secondary)]">{city.description}</p>
-                    <div className="flex items-center justify-between text-sm font-semibold text-slate-900">
-                      <span>Cost index {city.cost_index}</span>
-                      <span>{city.popularity_score}/100</span>
+                    <div className="flex flex-wrap gap-2.5 pt-2">
+                      <InfoBadge className="border-white/20 bg-white/12 text-white">{selectedCity.name}</InfoBadge>
+                      <InfoBadge className="border-white/20 bg-white/12 text-white">{formatCurrency(formData.budget)}</InfoBadge>
+                      <InfoBadge className="border-white/20 bg-white/12 text-white">{formData.travelers} travelers</InfoBadge>
                     </div>
                   </div>
-                </button>
-              ))}
+                </div>
+              </article>
             </div>
-          </PageSection>
+          </div>
         </div>
+
+        {/* ── Suggestions Section ── */}
+        <PageSection className="w-full">
+          <SectionHeader
+            action={
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-700 transition hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
+                  onClick={() => moveSuggestions('prev')}
+                >
+                  <ArrowLeft size={18} />
+                </button>
+                <button
+                  type="button"
+                  className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-700 transition hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
+                  onClick={() => moveSuggestions('next')}
+                >
+                  <ArrowRight size={18} />
+                </button>
+              </div>
+            }
+            eyebrow="Suggestions"
+            title="Strong starting points"
+            description="A horizontal inspiration carousel to help you choose the right base for your next itinerary."
+          />
+          <div className="hide-scrollbar -mx-1 flex gap-5 overflow-x-auto px-1 pb-4" ref={suggestionRail}>
+            {cities.map((city) => (
+              <button
+                key={city.id}
+                type="button"
+                className="min-w-[300px] group overflow-hidden rounded-[30px] border border-white/80 bg-white text-left shadow-[0_20px_60px_rgba(15,23,42,0.08)] transition duration-300 hover:-translate-y-2 dark:bg-slate-800/90 dark:border-slate-700/60"
+                onClick={() =>
+                  setFormData((current) => ({
+                    ...current,
+                    destination: city.name,
+                    coverPhoto: city.image_url || coverFallback,
+                  }))
+                }
+              >
+                <div className="relative h-44 overflow-hidden">
+                  <img alt={city.name} className="h-full w-full object-cover transition duration-500 group-hover:scale-110" src={city.image_url || coverFallback} onError={(e) => { e.currentTarget.src = coverFallback; }} />
+                  <div className="absolute inset-0 bg-black/10 group-hover:bg-transparent transition duration-300" />
+                </div>
+                <div className="space-y-4 p-5">
+                  <div>
+                    <h3 className="text-xl font-semibold tracking-[-0.04em] text-slate-950 dark:text-white">{city.name}</h3>
+                    <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                      {city.country} • {city.region}
+                    </p>
+                  </div>
+                  <p className="text-sm leading-6 text-slate-600 line-clamp-2 dark:text-slate-400">{city.description}</p>
+                  <div className="flex items-center justify-between pt-1 text-sm font-semibold text-slate-900 dark:text-slate-200">
+                    <span className="flex items-center gap-1.5">
+                      <PiggyBank size={14} className="text-teal-600" />
+                      Cost {city.cost_index}
+                    </span>
+                    <span className="flex items-center gap-1.5 text-amber-600">
+                      <Sparkles size={14} />
+                      {city.popularity_score}
+                    </span>
+                  </div>
+                </div>
+              </button>
+            ))}
+          </div>
+        </PageSection>
       </div>
     </AppLayout>
   );

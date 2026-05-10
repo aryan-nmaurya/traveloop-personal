@@ -162,13 +162,14 @@ const ItineraryBuilderPage = () => {
             <FormField className="md:col-span-2" icon={ListPlus} label="Section title">
               <input name="title" value={draftSection.title} onChange={handleDraftChange} placeholder="Cliffside villa stay" />
             </FormField>
-            <FormField className="md:col-span-2" icon={ListPlus} label="All the necessary information about this section" shellClassName="items-start">
+            <FormField className="md:col-span-2" icon={ListPlus} label="Section brief" shellClassName="items-start rounded-[24px] py-1">
               <textarea
+                className="w-full bg-transparent border-0 outline-none"
                 name="description"
                 rows="4"
                 value={draftSection.description}
                 onChange={handleDraftChange}
-                placeholder="This can be a hotel, travel transfer, experience booking, or any other activity."
+                placeholder="Describe the hotel, transfer details, or activity specifics."
               />
             </FormField>
             <FormField icon={Calendar} label="Start date">

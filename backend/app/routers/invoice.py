@@ -85,7 +85,7 @@ def get_invoice_pdf(
             c.drawString(20 * mm, y, str(item.get("type") or "—")[:14])
             c.drawString(60 * mm, y, str(item.get("description") or "")[:40])
             c.drawString(130 * mm, y, date_str[:20])
-            c.drawString(175 * mm, y, f"${item.get('amount', 0):,.2f}")
+            c.drawString(175 * mm, y, f"₹{item.get('amount', 0):,.2f}")
             y -= 6 * mm
             if y < 40 * mm:
                 c.showPage()
@@ -97,14 +97,14 @@ def get_invoice_pdf(
         y -= 6 * mm
         c.setFont("Helvetica-Bold", 10)
         c.drawString(140 * mm, y, "Subtotal:")
-        c.drawString(175 * mm, y, f"${invoice['subtotal']:,.2f}")
+        c.drawString(175 * mm, y, f"₹{invoice['subtotal']:,.2f}")
         y -= 6 * mm
         c.drawString(140 * mm, y, "Tax:")
-        c.drawString(175 * mm, y, f"${invoice['tax']:,.2f}")
+        c.drawString(175 * mm, y, f"₹{invoice['tax']:,.2f}")
         y -= 6 * mm
         c.setFont("Helvetica-Bold", 12)
         c.drawString(140 * mm, y, "Grand Total:")
-        c.drawString(175 * mm, y, f"${invoice['total']:,.2f}")
+        c.drawString(175 * mm, y, f"₹{invoice['total']:,.2f}")
 
         c.save()
         buffer.seek(0)
