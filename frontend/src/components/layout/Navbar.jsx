@@ -46,7 +46,7 @@ const Navbar = () => {
           >
             {mobileOpen ? <X size={18} /> : <Menu size={18} />}
           </button>
-          <BrandLogo wordClassName="text-[22px] tracking-[0.28em]" />
+          <BrandLogo imgClassName="h-5 sm:h-6" />
         </div>
 
         <nav

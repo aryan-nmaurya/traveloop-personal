@@ -38,7 +38,7 @@ const SignupPage = () => {
     <div className="relative min-h-screen overflow-hidden bg-[var(--background)]">
       <div className="pointer-events-none absolute inset-x-0 top-0 h-[360px] bg-[radial-gradient(circle_at_top_left,_rgba(14,165,233,0.22),_transparent_28%),radial-gradient(circle_at_top_right,_rgba(13,148,136,0.18),_transparent_24%)]" />
       <div className="relative z-10 mx-auto flex min-h-screen w-full max-w-[1440px] flex-col px-4 py-6 sm:px-6 lg:px-8">
-        <BrandLogo className="self-start" wordClassName="text-[22px] tracking-[0.28em]" />
+        <BrandLogo className="self-start" imgClassName="h-14 sm:h-16" />
 
         <div className="grid flex-1 items-center gap-8 py-8 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)]">
           <div className="relative hidden min-h-[660px] overflow-hidden rounded-[40px] border border-white/80 shadow-[0_32px_120px_rgba(15,23,42,0.14)] lg:block">

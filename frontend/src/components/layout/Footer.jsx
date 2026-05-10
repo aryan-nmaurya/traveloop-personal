@@ -37,7 +37,7 @@ const Footer = () => {
     <footer className="relative border-t border-white/80 bg-[rgba(255,255,255,0.74)] backdrop-blur-xl">
       <div className="mx-auto grid w-full max-w-[1440px] gap-8 px-4 py-10 sm:px-6 lg:grid-cols-[1.4fr_repeat(3,minmax(0,1fr))] lg:px-8 lg:py-14">
         <div className="space-y-5">
-          <BrandLogo wordClassName="text-[22px] tracking-[0.28em]" />
+          <BrandLogo markClassName="h-11" wordClassName="h-6" />
           <p className="max-w-md text-sm leading-7 text-[var(--text-secondary)]">
             Dream, budget, sequence, and ship multi-stop journeys from one polished planning workspace built for modern travelers.
           </p>
