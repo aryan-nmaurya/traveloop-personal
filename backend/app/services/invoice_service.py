@@ -1,4 +1,5 @@
 from datetime import date
+from typing import Any, cast
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
@@ -16,7 +17,8 @@ def get_invoice(db: Session, trip_id: int, user_id: int) -> dict:
     line_items = []
     subtotal = 0.0
     for sec in sections:
-        amount = float(sec.budget) if sec.budget else 0.0
+        # Cast to Any to satisfy linter that thinks sec.budget is a Column object
+        amount = float(cast(Any, sec.budget)) if sec.budget else 0.0
         subtotal += amount
         line_items.append({
             "section_id": sec.id,
@@ -31,7 +33,8 @@ def get_invoice(db: Session, trip_id: int, user_id: int) -> dict:
     tax = round(subtotal * tax_rate, 2)
     discount = 0.0  # Future support for discounts
     total = round(subtotal + tax - discount, 2)
-    budget = float(trip.budget) if trip.budget else None
+    # Cast to float to satisfy linter
+    budget = float(cast(Any, trip.budget)) if trip.budget else None
 
     return {
         "trip_id": trip.id,
@@ -52,5 +55,5 @@ def update_invoice_status(db: Session, trip_id: int, user_id: int, new_status: s
     trip = db.query(Trip).filter(Trip.id == trip_id, Trip.user_id == user_id).first()
     if not trip:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Trip not found")
-    trip.invoice_status = new_status
+    setattr(trip, 'invoice_status', new_status)
     db.commit()

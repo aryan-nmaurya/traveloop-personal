@@ -19,7 +19,7 @@ def _compute_status(trip: Trip) -> str:
 
 
 def _attach_status(trip: Trip) -> Trip:
-    trip.status = _compute_status(trip)
+    setattr(trip, 'status', _compute_status(trip))
     return trip
 
 
