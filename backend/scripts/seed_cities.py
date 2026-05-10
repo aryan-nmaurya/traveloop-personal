@@ -8,7 +8,7 @@ from app.core.database import SessionLocal
 from app.models.city import City
 from app.models.activity import Activity
 
-CITIES = [
+CITIES =[
     {"name": "Paris", "country": "France", "region": "Europe", "cost_index": 180.00, "popularity_score": 98, "description": "The City of Light, known for the Eiffel Tower, cuisine, and art.", "image_url": None},
     {"name": "Tokyo", "country": "Japan", "region": "Asia", "cost_index": 160.00, "popularity_score": 97, "description": "A blend of ultramodern and traditional, from neon-lit skyscrapers to historic temples.", "image_url": None},
     {"name": "New York City", "country": "USA", "region": "North America", "cost_index": 200.00, "popularity_score": 96, "description": "The city that never sleeps — Times Square, Central Park, and world-class dining.", "image_url": None},
@@ -62,7 +62,7 @@ CITIES = [
     {"name": "Maldives", "country": "Maldives", "region": "Asia", "cost_index": 300.00, "popularity_score": 48, "description": "Overwater bungalows, crystal-clear lagoons, and coral reefs.", "image_url": None},
 ]
 
-ACTIVITIES_BY_CITY = {
+ACTIVITIES_BY_CITY ={
     "Paris": [
         {"name": "Eiffel Tower Visit", "type": "cultural", "cost": 25.00, "duration_minutes": 120, "description": "Visit the iconic iron tower with panoramic city views."},
         {"name": "Louvre Museum", "type": "cultural", "cost": 17.00, "duration_minutes": 180, "description": "World's largest art museum featuring the Mona Lisa."},
