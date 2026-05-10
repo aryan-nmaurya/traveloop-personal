@@ -43,13 +43,13 @@ const SignupPage = () => {
       </nav>
 
       <div className="auth-left" style={{ paddingTop: '100px', paddingBottom: '40px' }}>
-        <div className="glass-panel auth-card" style={{ maxWidth: '540px', padding: '40px' }}>
+        <div className="auth-card" style={{ maxWidth: '540px', padding: '40px' }}>
           <div className="auth-header">
             <h1 className="auth-title">Start your journey</h1>
             <p className="auth-subtitle">Create an account to build epic itineraries.</p>
           </div>
 
-          {error && <div style={{ color: '#ff4d4f', marginBottom: '16px', textAlign: 'center', backgroundColor: '#fff1f0', padding: '8px', borderRadius: '4px' }}>{error}</div>}
+          {error && <div style={{ color: 'var(--error)', marginBottom: '24px', textAlign: 'center', backgroundColor: '#fee2e2', border: '1px solid #fecaca', padding: '12px', borderRadius: 'var(--radius-sm)', fontSize: '0.875rem' }}>{error}</div>}
 
           <form onSubmit={handleSignup}>
             <div className="photo-upload">

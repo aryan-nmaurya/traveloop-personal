@@ -32,13 +32,13 @@ const LoginPage = () => {
       </nav>
 
       <div className="auth-left">
-        <div className="glass-panel auth-card">
+        <div className="auth-card">
           <div className="auth-header">
             <h1 className="auth-title">Welcome back</h1>
             <p className="auth-subtitle">Log in to manage your epic journeys.</p>
           </div>
 
-          {error && <div style={{ color: '#ff4d4f', marginBottom: '16px', textAlign: 'center', backgroundColor: '#fff1f0', padding: '8px', borderRadius: '4px' }}>{error}</div>}
+          {error && <div style={{ color: 'var(--error)', marginBottom: '24px', textAlign: 'center', backgroundColor: '#fee2e2', border: '1px solid #fecaca', padding: '12px', borderRadius: 'var(--radius-sm)', fontSize: '0.875rem' }}>{error}</div>}
 
           <form onSubmit={handleLogin}>
             <div className="input-group">

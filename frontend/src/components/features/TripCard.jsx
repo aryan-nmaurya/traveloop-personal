@@ -3,7 +3,7 @@ import { Calendar, MapPin } from 'lucide-react';
 
 const TripCard = ({ trip }) => {
   return (
-    <div className="trip-card glass-panel">
+    <div className="trip-card">
       <div 
         className="trip-card-image" 
         style={{ backgroundImage: `url(${trip.cover_photo_url || 'https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?auto=format&fit=crop&q=80&w=800'})` }}
