@@ -1,15 +1,15 @@
 import { useEffect, useRef, useState } from 'react';
-import { Compass, MessageCircle, Send, Sparkles, Trash2, X } from 'lucide-react';
+import { Compass, MapPin, MessageCircle, Plus, Send, Sparkles, Trash2, X } from 'lucide-react';
 import api from '../../api/axiosInstance';
 import { cn } from '../../utils/cn';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 const QUICK_PROMPTS = [
   'Best budget trip under ₹50,000 🏕',
   'Plan a Goa trip for 5 days 🌊',
   'Honeymoon destinations in India 💑',
   'Solo travel tips for beginners 🎒',
-  'Hidden gems in Southeast Asia ✈',
+  'Hidden gems in Rajasthan 🏜',
 ];
 
 const TypingDots = () => (
@@ -18,23 +18,25 @@ const TypingDots = () => (
       <span
         key={i}
         className="h-2 w-2 rounded-full bg-slate-400 dark:bg-slate-500"
-        style={{ animation: `bounce 1.2s ease-in-out ${i * 0.2}s infinite` }}
+        style={{ animation: `chatBounce 1.2s ease-in-out ${i * 0.2}s infinite` }}
       />
     ))}
-    <style>{`@keyframes bounce{0%,80%,100%{transform:translateY(0)}40%{transform:translateY(-6px)}}`}</style>
+    <style>{`@keyframes chatBounce{0%,80%,100%{transform:translateY(0)}40%{transform:translateY(-6px)}}`}</style>
   </div>
 );
 
 const ChatBot = () => {
+  const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState([
     {
       role: 'assistant',
-      content: "Hi! I'm **Traveloop AI** ✈ — your personal travel planning assistant.\n\nAsk me anything: trip ideas, budgets, destinations, itineraries, or hidden gems. Where would you like to go?",
+      content: "Hi! I'm **Traveloop AI** ✈ — your personal travel planner.\n\nAsk me anything about destinations, budgets, activities, or say **\"Plan a trip to [city]\"** and I'll generate a full itinerary you can save!",
     },
   ]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const [creatingTrip, setCreatingTrip] = useState(false);
   const bottomRef = useRef(null);
   const inputRef = useRef(null);
   const location = useLocation();
@@ -65,14 +67,92 @@ const ChatBot = () => {
           content: m.content,
         })),
       });
-      setMessages((prev) => [...prev, { role: 'assistant', content: res.data.reply }]);
+      const reply = res.data.reply || "Sorry, I couldn't generate a response.";
+      setMessages((prev) => [...prev, { role: 'assistant', content: reply }]);
     } catch {
       setMessages((prev) => [
         ...prev,
-        { role: 'assistant', content: "Sorry, I couldn't connect right now. Please try again in a moment." },
+        { role: 'assistant', content: "Sorry, I couldn't connect right now. Please try again." },
       ]);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleCreateTrip = async () => {
+    if (creatingTrip) return;
+    setCreatingTrip(true);
+
+    // Gather context from the conversation
+    const userMessages = messages.filter((m) => m.role === 'user').map((m) => m.content);
+    const assistantMessages = messages.filter((m) => m.role === 'assistant').map((m) => m.content);
+    const lastAssistant = assistantMessages[assistantMessages.length - 1] || '';
+
+    // Extract a trip name from conversation
+    const cityMatch = userMessages.join(' ').match(/(?:trip to|visit|go to|plan.*?)\s+([A-Z][a-z]+(?:\s[A-Z][a-z]+)*)/i);
+    const tripName = cityMatch ? `AI Trip to ${cityMatch[1]}` : 'AI-Generated Trip';
+
+    try {
+      const response = await api.post('/trips', {
+        name: tripName,
+        description: `Generated from Traveloop AI chat:\n\n${lastAssistant.slice(0, 500)}`,
+        budget: 50000,
+        is_public: false,
+      });
+
+      const tripId = response.data.id;
+
+      // Parse the AI response to create sections
+      const lines = lastAssistant.split('\n');
+      let sectionIndex = 0;
+
+      for (const line of lines) {
+        // Match patterns like "Day 1-3:", "**Day 1:**", "• **Manali**", etc.
+        const dayMatch = line.match(/(?:\*\*)?Day\s*(\d+(?:[–-]\d+)?)\s*(?::|\*\*)/i);
+        const bulletMatch = line.match(/[•\-\*]\s*\*?\*?([^:*]+)\*?\*?\s*[:\—–-]/);
+
+        if (dayMatch || (bulletMatch && line.length > 30)) {
+          const desc = line.replace(/[*•\-]/g, '').replace(/<[^>]+>/g, '').trim();
+          if (desc.length > 10) {
+            try {
+              await api.post(`/trips/${tripId}/sections`, {
+                type: 'stay',
+                description: desc,
+                budget: 0,
+                order_index: sectionIndex++,
+              });
+            } catch { /* continue */ }
+          }
+        }
+      }
+
+      // If no sections were parsed, create one with the full response
+      if (sectionIndex === 0) {
+        await api.post(`/trips/${tripId}/sections`, {
+          type: 'stay',
+          description: lastAssistant.slice(0, 500).replace(/[*#]/g, '').trim(),
+          budget: 0,
+          order_index: 0,
+        }).catch(() => {});
+      }
+
+      setMessages((prev) => [
+        ...prev,
+        { role: 'assistant', content: `✅ **Trip created!** "${tripName}" with ${Math.max(sectionIndex, 1)} sections.\n\nRedirecting you to the itinerary view…` },
+      ]);
+
+      setTimeout(() => {
+        setOpen(false);
+        navigate(`/trips/${tripId}/view`);
+      }, 1500);
+    } catch (err) {
+      console.error('Trip creation failed:', err);
+      setMessages((prev) => [
+        ...prev,
+        { role: 'assistant', content: "❌ Sorry, I couldn't create the trip. Please try again or use the **Plan a trip** button." },
+      ]);
+    } finally {
+      setCreatingTrip(false);
     }
   };
 
@@ -83,101 +163,91 @@ const ChatBot = () => {
       .replace(/\n/g, '<br/>');
   };
 
+  const hasEnoughContext = messages.filter((m) => m.role === 'assistant').length >= 2;
+
   return (
     <>
-      {/* Floating button — sits above the "Plan a new trip" FAB on dashboard */}
+      {/* Floating button */}
       <button
         type="button"
         className={cn(
-          'fixed bottom-20 right-5 z-50 inline-flex h-14 w-14 items-center justify-center rounded-full shadow-[0_20px_60px_rgba(14,116,144,0.36)] transition-all duration-300',
+          'fixed z-50 inline-flex items-center justify-center rounded-full shadow-[0_20px_60px_rgba(14,116,144,0.36)] transition-all duration-300',
           open
-            ? 'bg-slate-900 dark:bg-slate-700 scale-95'
-            : 'bg-[linear-gradient(135deg,#0f766e_0%,#0ea5e9_100%)] hover:-translate-y-1 hover:shadow-[0_28px_70px_rgba(14,116,144,0.44)]',
+            ? 'bottom-6 right-6 h-12 w-12 bg-slate-900 dark:bg-slate-700 scale-95'
+            : 'bottom-6 right-6 h-14 w-14 bg-[linear-gradient(135deg,#0f766e_0%,#0ea5e9_100%)] hover:-translate-y-1 hover:shadow-[0_28px_70px_rgba(14,116,144,0.44)]',
         )}
         aria-label={open ? 'Close AI assistant' : 'Open AI travel assistant'}
         onClick={() => setOpen((o) => !o)}
       >
-        {open ? <X size={22} className="text-white" /> : <MessageCircle size={22} className="text-white" />}
+        {open ? <X size={20} className="text-white" /> : <MessageCircle size={22} className="text-white" />}
       </button>
 
       {/* Chat panel */}
       <div
         className={cn(
-          'fixed bottom-36 right-5 z-50 flex w-[360px] flex-col overflow-hidden rounded-[28px] border shadow-[0_32px_100px_rgba(15,23,42,0.22)] backdrop-blur transition-all duration-400 sm:w-[400px]',
+          'fixed z-50 flex flex-col overflow-hidden rounded-[24px] border shadow-[0_32px_100px_rgba(15,23,42,0.22)] backdrop-blur transition-all duration-300',
+          'bottom-[76px] right-6 w-[370px] sm:w-[400px]',
           open ? 'scale-100 opacity-100 translate-y-0 pointer-events-auto' : 'scale-95 opacity-0 translate-y-4 pointer-events-none',
         )}
         style={{
           background: 'var(--card-bg)',
           borderColor: 'var(--card-border)',
-          maxHeight: 'calc(100vh - 180px)',
+          maxHeight: 'min(520px, calc(100vh - 120px))',
         }}
       >
         {/* Header */}
         <div
-          className="flex items-center gap-3 border-b px-5 py-4"
+          className="flex items-center gap-3 border-b px-5 py-3.5 shrink-0"
           style={{ borderColor: 'var(--line)', background: 'var(--surface)' }}
         >
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[linear-gradient(135deg,#0f766e,#0ea5e9)]">
-            <Sparkles size={18} className="text-white" />
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[linear-gradient(135deg,#0f766e,#0ea5e9)]">
+            <Sparkles size={16} className="text-white" />
           </div>
-          <div>
-            <p className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>Traveloop AI</p>
-            <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Powered by NVIDIA NIM · Always on</p>
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-semibold truncate" style={{ color: 'var(--text-primary)' }}>Traveloop AI</p>
+            <p className="text-[10px]" style={{ color: 'var(--text-muted)' }}>Powered by NVIDIA NIM</p>
           </div>
-          <div className="ml-auto flex items-center gap-2">
-            <button
-              type="button"
-              className="inline-flex h-9 w-9 items-center justify-center rounded-full border transition hover:-translate-y-0.5"
-              style={{ borderColor: 'var(--input-border)', color: 'var(--text-muted)', background: 'var(--input-bg)' }}
-              title="Clear chat"
-              onClick={() => setMessages([{
-                role: 'assistant',
-                content: "Chat cleared! I'm ready to help you plan your next adventure. Where would you like to go?",
-              }])}
-            >
-              <Trash2 size={14} />
-            </button>
-            <button
-              type="button"
-              className="inline-flex h-9 w-9 items-center justify-center rounded-full border transition hover:-translate-y-0.5"
-              style={{ borderColor: 'var(--input-border)', color: 'var(--text-muted)', background: 'var(--input-bg)' }}
-              onClick={() => setOpen(false)}
-            >
-              <X size={14} />
-            </button>
-          </div>
+          <button
+            type="button"
+            className="inline-flex h-8 w-8 items-center justify-center rounded-full border transition hover:opacity-70"
+            style={{ borderColor: 'var(--input-border)', color: 'var(--text-muted)', background: 'var(--input-bg)' }}
+            title="Clear chat"
+            onClick={() => setMessages([{
+              role: 'assistant',
+              content: "Chat cleared! I'm ready to help plan your next adventure. ✈",
+            }])}
+          >
+            <Trash2 size={13} />
+          </button>
         </div>
 
         {/* Messages */}
-        <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4" style={{ minHeight: 280, maxHeight: 380 }}>
+        <div className="flex-1 overflow-y-auto px-4 py-3 space-y-3" style={{ minHeight: 200 }}>
           {messages.map((msg, i) => (
-            <div key={i} className={cn('flex gap-2.5', msg.role === 'user' ? 'flex-row-reverse' : 'flex-row')}>
+            <div key={i} className={cn('flex gap-2', msg.role === 'user' ? 'flex-row-reverse' : 'flex-row')}>
               {msg.role === 'assistant' && (
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[linear-gradient(135deg,#0f766e,#0ea5e9)] mt-0.5">
-                  <Compass size={14} className="text-white" />
+                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[linear-gradient(135deg,#0f766e,#0ea5e9)] mt-0.5">
+                  <Compass size={12} className="text-white" />
                 </div>
               )}
               <div
                 className={cn(
-                  'max-w-[82%] rounded-[18px] px-4 py-3 text-sm leading-6',
+                  'max-w-[80%] rounded-[16px] px-3.5 py-2.5 text-[13px] leading-[1.6]',
                   msg.role === 'user'
                     ? 'rounded-tr-md bg-[linear-gradient(135deg,#0f766e,#0ea5e9)] text-white'
                     : 'rounded-tl-md',
                 )}
-                style={msg.role !== 'user' ? { background: 'var(--surface)', color: 'var(--text-primary)', borderColor: 'var(--line)', border: '1px solid var(--line)' } : {}}
+                style={msg.role !== 'user' ? { background: 'var(--surface)', color: 'var(--text-primary)', border: '1px solid var(--line)' } : {}}
                 dangerouslySetInnerHTML={{ __html: renderContent(msg.content) }}
               />
             </div>
           ))}
           {loading && (
-            <div className="flex gap-2.5">
-              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[linear-gradient(135deg,#0f766e,#0ea5e9)]">
-                <Compass size={14} className="text-white" />
+            <div className="flex gap-2">
+              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[linear-gradient(135deg,#0f766e,#0ea5e9)]">
+                <Compass size={12} className="text-white" />
               </div>
-              <div
-                className="rounded-[18px] rounded-tl-md px-4 py-3"
-                style={{ background: 'var(--surface)', border: '1px solid var(--line)' }}
-              >
+              <div className="rounded-[16px] rounded-tl-md px-3.5 py-2.5" style={{ background: 'var(--surface)', border: '1px solid var(--line)' }}>
                 <TypingDots />
               </div>
             </div>
@@ -185,18 +255,42 @@ const ChatBot = () => {
           <div ref={bottomRef} />
         </div>
 
+        {/* Create Trip CTA — shows after at least 2 AI responses */}
+        {hasEnoughContext && !loading && (
+          <div className="shrink-0 border-t px-4 py-2.5" style={{ borderColor: 'var(--line)' }}>
+            <button
+              type="button"
+              disabled={creatingTrip}
+              onClick={handleCreateTrip}
+              className="flex w-full items-center justify-center gap-2 rounded-full bg-[linear-gradient(135deg,#0f766e,#0ea5e9)] px-4 py-2.5 text-xs font-semibold text-white shadow-[0_8px_24px_rgba(14,116,144,0.25)] transition hover:-translate-y-0.5 disabled:opacity-60"
+            >
+              {creatingTrip ? (
+                <>
+                  <div className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                  Creating your trip…
+                </>
+              ) : (
+                <>
+                  <Plus size={14} />
+                  Create trip from this conversation
+                </>
+              )}
+            </button>
+          </div>
+        )}
+
         {/* Quick prompts */}
         {messages.length <= 1 && (
-          <div className="border-t px-4 py-3" style={{ borderColor: 'var(--line)' }}>
-            <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.16em]" style={{ color: 'var(--text-muted)' }}>
+          <div className="shrink-0 border-t px-4 py-2.5" style={{ borderColor: 'var(--line)' }}>
+            <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-[0.16em]" style={{ color: 'var(--text-muted)' }}>
               Quick start
             </p>
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-1.5">
               {QUICK_PROMPTS.map((prompt) => (
                 <button
                   key={prompt}
                   type="button"
-                  className="rounded-full border px-3 py-1.5 text-[11px] font-medium transition hover:-translate-y-0.5"
+                  className="rounded-full border px-2.5 py-1 text-[10px] font-medium transition hover:-translate-y-0.5"
                   style={{ borderColor: 'var(--input-border)', color: 'var(--text-secondary)', background: 'var(--input-bg)' }}
                   onClick={() => sendMessage(prompt)}
                 >
@@ -208,20 +302,20 @@ const ChatBot = () => {
         )}
 
         {/* Input */}
-        <div className="border-t px-4 py-3" style={{ borderColor: 'var(--line)' }}>
+        <div className="shrink-0 border-t px-4 py-2.5" style={{ borderColor: 'var(--line)' }}>
           <form
             className="flex items-center gap-2"
             onSubmit={(e) => { e.preventDefault(); sendMessage(); }}
           >
             <input
               ref={inputRef}
-              className="flex-1 rounded-full border px-4 py-2.5 text-sm outline-none transition"
+              className="flex-1 rounded-full border px-3.5 py-2 text-[13px] outline-none transition"
               style={{
                 background: 'var(--input-bg)',
                 borderColor: 'var(--input-border)',
                 color: 'var(--text-primary)',
               }}
-              placeholder="Ask about destinations, budgets, activities…"
+              placeholder="Ask about destinations, budgets…"
               value={input}
               onChange={(e) => setInput(e.target.value)}
               disabled={loading}
@@ -229,14 +323,11 @@ const ChatBot = () => {
             <button
               type="submit"
               disabled={!input.trim() || loading}
-              className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[linear-gradient(135deg,#0f766e,#0ea5e9)] text-white shadow-[0_8px_24px_rgba(14,116,144,0.30)] transition hover:-translate-y-0.5 disabled:opacity-50 disabled:pointer-events-none"
+              className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[linear-gradient(135deg,#0f766e,#0ea5e9)] text-white shadow-[0_8px_24px_rgba(14,116,144,0.30)] transition hover:-translate-y-0.5 disabled:opacity-50 disabled:pointer-events-none"
             >
-              <Send size={15} />
+              <Send size={14} />
             </button>
           </form>
-          <p className="mt-2 text-center text-[10px]" style={{ color: 'var(--text-muted)' }}>
-            AI responses are suggestions — always verify before booking.
-          </p>
         </div>
       </div>
     </>
