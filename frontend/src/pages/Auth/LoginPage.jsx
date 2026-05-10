@@ -1,18 +1,24 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Compass, ArrowRight, Lock, Mail } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
 
 const LoginPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState(null);
   const navigate = useNavigate();
+  const { login } = useAuth();
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
-    // Simulate login for now
-    console.log('Login attempt with', { email, password });
-    // In real app, this would call /auth/login and save token
-    // navigate('/'); 
+    setError(null);
+    try {
+      await login(email, password);
+      navigate('/');
+    } catch (err) {
+      setError(err.response?.data?.detail || 'Invalid email or password');
+    }
   };
 
   return (
@@ -31,6 +37,8 @@ const LoginPage = () => {
             <h1 className="auth-title">Welcome back</h1>
             <p className="auth-subtitle">Log in to manage your epic journeys.</p>
           </div>
+
+          {error && <div style={{ color: '#ff4d4f', marginBottom: '16px', textAlign: 'center', backgroundColor: '#fff1f0', padding: '8px', borderRadius: '4px' }}>{error}</div>}
 
           <form onSubmit={handleLogin}>
             <div className="input-group">

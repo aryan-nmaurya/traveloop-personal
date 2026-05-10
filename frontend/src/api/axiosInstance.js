@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8000',
+  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1',
 });
 
 api.interceptors.request.use((config) => {
@@ -17,10 +17,25 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use((response) => {
   return response;
 }, async (error) => {
-  // Example: handle 401 Unauthorized for token refresh here
-  if (error.response?.status === 401) {
-    console.warn("Unauthorized: Token might be expired.");
-    // In a real implementation: refresh token logic goes here.
+  const originalRequest = error.config;
+  
+  if (error.response?.status === 401 && !originalRequest._retry) {
+    originalRequest._retry = true;
+    try {
+      // Refresh token logic. Assuming HTTPOnly cookie for refresh token.
+      const res = await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1'}/auth/refresh`, {}, { withCredentials: true });
+      const newAccessToken = res.data.access_token;
+      if (newAccessToken) {
+        localStorage.setItem('access_token', newAccessToken);
+        api.defaults.headers.common['Authorization'] = `Bearer ${newAccessToken}`;
+        originalRequest.headers['Authorization'] = `Bearer ${newAccessToken}`;
+        return api(originalRequest);
+      }
+    } catch (refreshError) {
+      console.warn("Refresh token expired or unauthorized. Logging out...");
+      localStorage.removeItem('access_token');
+      window.location.href = '/login';
+    }
   }
   return Promise.reject(error);
 });

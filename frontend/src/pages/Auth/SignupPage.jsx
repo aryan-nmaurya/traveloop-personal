@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Compass, ArrowRight, UserPlus, Image as ImageIcon } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
 
 const SignupPage = () => {
   const [formData, setFormData] = useState({
@@ -14,16 +15,22 @@ const SignupPage = () => {
   });
 
   const navigate = useNavigate();
+  const { signup } = useAuth();
+  const [error, setError] = useState(null);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSignup = (e) => {
+  const handleSignup = async (e) => {
     e.preventDefault();
-    console.log('Signup attempt', formData);
-    // Real implementation would call /auth/signup
-    // navigate('/login');
+    setError(null);
+    try {
+      await signup(formData);
+      navigate('/');
+    } catch (err) {
+      setError(err.response?.data?.detail || 'Signup failed. Please try again.');
+    }
   };
 
   return (
@@ -41,6 +48,8 @@ const SignupPage = () => {
             <h1 className="auth-title">Start your journey</h1>
             <p className="auth-subtitle">Create an account to build epic itineraries.</p>
           </div>
+
+          {error && <div style={{ color: '#ff4d4f', marginBottom: '16px', textAlign: 'center', backgroundColor: '#fff1f0', padding: '8px', borderRadius: '4px' }}>{error}</div>}
 
           <form onSubmit={handleSignup}>
             <div className="photo-upload">
