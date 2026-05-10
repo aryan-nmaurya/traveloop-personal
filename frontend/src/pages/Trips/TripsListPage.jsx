@@ -1,134 +1,199 @@
-import React, { useState, useEffect } from 'react';
-import Navbar from '../../components/layout/Navbar';
-import Footer from '../../components/layout/Footer';
+import { useEffect, useState } from 'react';
+import { ArrowUpDown, Plus, Search, Trash2 } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import AppLayout from '../../components/layout/AppLayout';
 import TripCard from '../../components/features/TripCard';
-import { Search, Plus, Filter, ArrowUpDown, LayoutGrid } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
 import api from '../../api/axiosInstance';
-import '../Dashboard/Dashboard.css'; // Reusing dashboard styles for search bar and grid
+import { getAllTrips, hydrateTrip, removeLocalTrip } from '../../data/mockData';
+import { Button, EmptyState, PageIntro, PageSection, SearchField, SectionHeader, SkeletonCard, TabButton, Toolbar } from '../../components/ui/primitives';
 
-const MOCK_TRIPS = [
-  { id: 1, name: 'Summer in Europe', date_range: 'Jun 12 - Jul 05', destinations_count: 4, status: 'Upcoming', cover_photo_url: 'https://images.unsplash.com/photo-1499856871958-5b9627545d1a?auto=format&fit=crop&q=80&w=800' },
-  { id: 2, name: 'Japan Cherry Blossom', date_range: 'Apr 02 - Apr 15', destinations_count: 3, status: 'Completed', cover_photo_url: 'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?auto=format&fit=crop&q=80&w=800' },
-  { id: 3, name: 'Bali Retreat', date_range: 'Sep 10 - Sep 20', destinations_count: 1, status: 'Ongoing', cover_photo_url: 'https://images.unsplash.com/photo-1537996194471-e657df975ab4?auto=format&fit=crop&q=80&w=800' },
-  { id: 4, name: 'New York Weekend', date_range: 'Dec 10 - Dec 12', destinations_count: 1, status: 'Upcoming', cover_photo_url: 'https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?auto=format&fit=crop&q=80&w=800' },
-];
+const sortOptions = {
+  newest: 'Newest first',
+  budget: 'Highest budget',
+  status: 'Status',
+  alphabetical: 'Alphabetical',
+};
+
+const statusOrder = ['Ongoing', 'Upcoming', 'Completed', 'Draft'];
 
 const TripsListPage = () => {
   const navigate = useNavigate();
   const [trips, setTrips] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
+  const [activeTab, setActiveTab] = useState('All');
+  const [sortBy, setSortBy] = useState('newest');
 
   useEffect(() => {
-    const fetchTrips = async () => {
+    let cancelled = false;
+
+    const loadTrips = async () => {
       try {
-        const res = await api.get('/trips');
-        setTrips(res.data.trips || res.data || MOCK_TRIPS);
-      } catch (err) {
-        setTrips(MOCK_TRIPS);
+        const response = await api.get('/trips');
+        if (!cancelled) {
+          const liveTrips = (response.data?.trips ?? []).map((trip) => hydrateTrip(trip));
+          setTrips(liveTrips.length ? liveTrips : getAllTrips());
+        }
+      } catch {
+        if (!cancelled) {
+          setTrips(getAllTrips());
+        }
       } finally {
-        setLoading(false);
+        if (!cancelled) {
+          setLoading(false);
+        }
       }
     };
-    fetchTrips();
+
+    loadTrips();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
-  const tabs = ['All', 'Ongoing', 'Upcoming', 'Completed'];
-  
-  const filteredTrips = trips.filter(trip => {
-    const matchesSearch = trip.name.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesTab = activeTab === 'All' || trip.status === activeTab;
-    return matchesSearch && matchesTab;
-  });
+  const filteredTrips = trips
+    .filter((trip) => {
+      const query = searchQuery.trim().toLowerCase();
+      const matchesSearch =
+        !query ||
+        trip.name.toLowerCase().includes(query) ||
+        trip.description?.toLowerCase().includes(query) ||
+        trip.summary?.toLowerCase().includes(query);
+      const matchesTab = activeTab === 'All' || trip.status === activeTab;
+      return matchesSearch && matchesTab;
+    })
+    .sort((left, right) => {
+      if (sortBy === 'alphabetical') return left.name.localeCompare(right.name);
+      if (sortBy === 'budget') return Number(right.budget ?? 0) - Number(left.budget ?? 0);
+      if (sortBy === 'status') return left.status.localeCompare(right.status);
+      return new Date(right.created_at ?? right.start_date ?? 0) - new Date(left.created_at ?? left.start_date ?? 0);
+    });
+
+  const groupedTrips =
+    activeTab === 'All'
+      ? statusOrder.map((status) => ({
+          status,
+          trips: filteredTrips.filter((trip) => trip.status === status),
+        }))
+      : [{ status: activeTab, trips: filteredTrips }];
+
+  const handleDelete = async (tripId) => {
+    try {
+      await api.delete(`/trips/${tripId}`);
+    } catch {
+      removeLocalTrip(tripId);
+    } finally {
+      setTrips((current) => current.filter((trip) => String(trip.id) !== String(tripId)));
+    }
+  };
 
   return (
-    <div className="dashboard-layout">
-      <Navbar />
-      
-      <main className="dashboard-main">
-        <div className="section-header" style={{ marginBottom: 0 }}>
-          <h1 className="banner-title" style={{ fontSize: '2.5rem', marginBottom: 0 }}>My Trips</h1>
-          <button className="btn btn-primary" onClick={() => navigate('/trips/new')}>
-            <Plus size={18} /> Plan a New Trip
-          </button>
-        </div>
+    <AppLayout>
+      <PageIntro
+        actions={[
+          <Button key="new" onClick={() => navigate('/trips/new')}>
+            <Plus size={16} />
+            Plan a trip
+          </Button>,
+        ]}
+        description="Search, sort, and scan your ongoing, upcoming, completed, and draft journeys through the same polished trip card system used across the app."
+        eyebrow="User trip listing"
+        title="Everything you have planned, grouped in one place."
+      />
 
-        {/* Search & Filter Section */}
-        <div className="search-filter-section">
-          <div className="search-bar-expanded">
-            <Search size={20} className="search-icon" />
-            <input 
-              type="text" 
-              placeholder="Search your trips..." 
-              className="search-input"
+      <PageSection>
+        <Toolbar className="mb-5">
+          <SearchField className="min-w-0 lg:min-w-[340px] lg:flex-1" icon={Search}>
+            <input
+              placeholder="Search trips, places, summaries, or traveler notes"
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(event) => setSearchQuery(event.target.value)}
             />
-          </div>
-          <div className="filter-controls">
-            <button className="filter-btn">
-              <LayoutGrid size={16} /> Group by
-            </button>
-            <button className="filter-btn">
-              <Filter size={16} /> Filter
-            </button>
-            <button className="filter-btn">
-              <ArrowUpDown size={16} /> Sort by
-            </button>
-          </div>
-        </div>
+          </SearchField>
 
-        {/* Tabs */}
-        <div style={{ display: 'flex', gap: '16px', borderBottom: '1px solid var(--card-border)', paddingBottom: '16px' }}>
-          {tabs.map(tab => (
-            <button 
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              style={{
-                background: 'transparent',
-                border: 'none',
-                fontSize: '1rem',
-                fontWeight: activeTab === tab ? '600' : '500',
-                color: activeTab === tab ? 'var(--accent-primary)' : 'var(--text-secondary)',
-                cursor: 'pointer',
-                position: 'relative',
-                padding: '8px 4px'
-              }}
-            >
+          <label className="field-shell min-h-14 rounded-full lg:min-w-[220px]">
+            <ArrowUpDown className="h-4.5 w-4.5 text-slate-400" />
+            <select value={sortBy} onChange={(event) => setSortBy(event.target.value)}>
+              {Object.entries(sortOptions).map(([value, label]) => (
+                <option key={value} value={value}>
+                  {label}
+                </option>
+              ))}
+            </select>
+          </label>
+        </Toolbar>
+
+        <div className="flex flex-wrap gap-2">
+          {['All', ...statusOrder].map((tab) => (
+            <TabButton key={tab} active={activeTab === tab} onClick={() => setActiveTab(tab)}>
               {tab}
-              {activeTab === tab && (
-                <div style={{ position: 'absolute', bottom: '-17px', left: 0, right: 0, height: '3px', background: 'var(--accent-primary)', borderRadius: '2px' }} />
-              )}
-            </button>
+            </TabButton>
           ))}
         </div>
+      </PageSection>
 
-        {/* Trips Grid */}
-        <section className="dashboard-section" style={{ animationDelay: '0.1s' }}>
-          {loading ? (
-            <div className="empty-state stitch-card">Loading your journeys...</div>
-          ) : filteredTrips.length > 0 ? (
-            <div className="trips-grid-vertical">
-              {filteredTrips.map(trip => (
-                <TripCard key={trip.id} trip={trip} />
-              ))}
-            </div>
-          ) : (
-            <div className="empty-state stitch-card">
-              <h3 style={{ fontSize: '1.25rem', marginBottom: '8px', color: 'var(--text-primary)' }}>No trips found</h3>
-              <p style={{ marginBottom: '24px' }}>Get started by planning your next amazing adventure.</p>
-              <button className="btn btn-primary" onClick={() => navigate('/trips/new')}>
-                Start Planning
-              </button>
-            </div>
-          )}
-        </section>
-      </main>
-      
-      <Footer />
-    </div>
+      {loading ? (
+        <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+          {[1, 2, 3].map((item) => (
+            <SkeletonCard key={item} />
+          ))}
+        </div>
+      ) : groupedTrips.some((group) => group.trips.length > 0) ? (
+        groupedTrips.map((group) =>
+          group.trips.length ? (
+            <PageSection key={group.status}>
+              <SectionHeader
+                action={<span className="rounded-full bg-slate-100 px-3 py-1 text-sm font-semibold text-slate-600">{group.trips.length} trips</span>}
+                eyebrow="Previous trips"
+                title={group.status}
+                description={`A ${group.status.toLowerCase()} slice of your travel workspace.`}
+              />
+              <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+                {group.trips.map((trip) => (
+                  <div key={trip.id} className="space-y-3">
+                    <TripCard
+                      actions={[
+                        { label: 'View', to: `/trips/${trip.id}/view`, tone: 'primary' },
+                        { label: 'Build', to: `/trips/${trip.id}/build` },
+                        { label: 'Budget', to: `/trips/${trip.id}/invoice` },
+                      ]}
+                      trip={trip}
+                    />
+                    <div className="flex flex-wrap items-center gap-3 px-2 text-sm font-medium">
+                      <Link className="text-slate-600 transition hover:text-slate-950" to={`/trips/${trip.id}/checklist`}>
+                        Checklist
+                      </Link>
+                      <Link className="text-slate-600 transition hover:text-slate-950" to={`/trips/${trip.id}/notes`}>
+                        Notes
+                      </Link>
+                      <button
+                        type="button"
+                        className="inline-flex items-center gap-1.5 text-rose-600 transition hover:text-rose-700"
+                        onClick={() => handleDelete(trip.id)}
+                      >
+                        <Trash2 size={14} />
+                        Delete
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </PageSection>
+          ) : null,
+        )
+      ) : (
+        <EmptyState
+          action={
+            <Button onClick={() => navigate('/trips/new')}>
+              <Plus size={16} />
+              Start a new itinerary
+            </Button>
+          }
+          description="No trips matched the active filters. Try a broader search or begin a fresh planning workspace."
+          title="No trips matched your filters"
+        />
+      )}
+    </AppLayout>
   );
 };
 

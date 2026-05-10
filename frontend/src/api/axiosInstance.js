@@ -31,7 +31,7 @@ api.interceptors.response.use((response) => {
         originalRequest.headers['Authorization'] = `Bearer ${newAccessToken}`;
         return api(originalRequest);
       }
-    } catch (refreshError) {
+    } catch {
       console.warn("Refresh token expired or unauthorized. Logging out...");
       localStorage.removeItem('access_token');
       window.location.href = '/login';
