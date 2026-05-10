@@ -164,6 +164,41 @@ const MovieItineraryPage = () => {
   const [selected, setSelected] = useState(movies[0]);
   const [generating, setGenerating] = useState(false);
   const [generated, setGenerated] = useState(false);
+  const [startingTrip, setStartingTrip] = useState(false);
+
+  const handleStartTrip = async () => {
+    if (startingTrip) return;
+    setStartingTrip(true);
+    try {
+      const itinerary = selected.generated_itinerary || selected.itinerary;
+      const response = await api.post('/trips', {
+        name: `${selected.title} — Cinematic Trip`,
+        description: `A ${selected.duration} journey inspired by ${selected.title} (${selected.year}). Vibe: ${selected.vibe}. Destinations: ${selected.destinations.join(', ')}.`,
+        cover_photo_url: selected.image,
+        budget: parseInt(selected.budget.replace(/[^0-9]/g, '')) || 50000,
+        is_public: false,
+      });
+      const tripId = response.data.id;
+      // Create sections from the itinerary
+      for (const day of itinerary) {
+        try {
+          await api.post(`/trips/${tripId}/sections`, {
+            type: 'stay',
+            description: `${day.location} — ${day.activities.join(', ')}`,
+            budget: parseInt((day.budget || '0').replace(/[^0-9]/g, '')) || 0,
+            order_index: itinerary.indexOf(day),
+          });
+        } catch { /* continue with remaining sections */ }
+      }
+      navigate(`/trips/${tripId}/view`);
+    } catch (err) {
+      console.error('Failed to create trip:', err);
+      // Fallback: just navigate to create page
+      navigate('/trips/new');
+    } finally {
+      setStartingTrip(false);
+    }
+  };
 
   const handleGenerate = async () => {
     setGenerating(true);
@@ -204,9 +239,9 @@ const MovieItineraryPage = () => {
         title="Live the journey, not just the destination."
         description="Pick a movie that moves you — we'll build an immersive day-by-day itinerary that captures its landscapes, emotions, and spirit."
         actions={[
-          <Button key="new" onClick={() => navigate('/trips/new')}>
+          <Button key="new" onClick={handleStartTrip} disabled={startingTrip}>
             <Plus size={16} />
-            Turn into a trip
+            {startingTrip ? 'Creating trip…' : 'Turn into a trip'}
           </Button>,
         ]}
       />
@@ -309,10 +344,10 @@ const MovieItineraryPage = () => {
                 <Sparkles size={16} />
                 {generating ? 'Generating itinerary…' : generated ? 'Regenerate' : 'Generate itinerary'}
               </Button>
-              <Button onClick={() => navigate('/trips/new')}>
+              <Button onClick={handleStartTrip} disabled={startingTrip}>
                 <Plus size={16} />
-                Start this trip
-                <ArrowRight size={15} />
+                {startingTrip ? 'Creating…' : 'Start this trip'}
+                {!startingTrip && <ArrowRight size={15} />}
               </Button>
             </div>
           </div>
@@ -352,9 +387,9 @@ const MovieItineraryPage = () => {
             title={`${selected.title} — Complete Journey`}
             description={`A ${selected.duration} curated experience capturing the essence of the film.`}
             action={
-              <Button size="sm" onClick={() => navigate('/trips/new')}>
+              <Button size="sm" onClick={handleStartTrip} disabled={startingTrip}>
                 <Plus size={15} />
-                Build this trip
+                {startingTrip ? 'Creating…' : 'Build this trip'}
               </Button>
             }
           />

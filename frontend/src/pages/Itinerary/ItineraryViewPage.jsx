@@ -1,42 +1,18 @@
-import { CalendarDays, LayoutList, MapPin } from 'lucide-react';
+import { CalendarDays, Edit3, LayoutList, MapPin, Receipt } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import AppLayout from '../../components/layout/AppLayout';
 import api from '../../api/axiosInstance';
 import { Button, EmptyState, InfoBadge, PageIntro, PageSection, SectionHeader, TabButton } from '../../components/ui/primitives';
-import { getTripById, hydrateTrip, profileFallback } from '../../data/mockData';
+import { getTripById, hydrateTrip, profileFallback, coverFallback } from '../../data/mockData';
 import { formatCurrency, formatDate, formatDateRange } from '../../utils/formatters';
-
-const buildDayCards = (trip, sections) => {
-  if (!trip?.start_date || !trip?.end_date) return [];
-
-  const cards = [];
-  let current = new Date(trip.start_date);
-  const end = new Date(trip.end_date);
-
-  while (current <= end) {
-    const currentLabel = current.toISOString().slice(0, 10);
-    const matching = sections.filter((section) => {
-      if (!section.start_date || !section.end_date) return false;
-      return currentLabel >= section.start_date && currentLabel <= section.end_date;
-    });
-
-    cards.push({
-      key: currentLabel,
-      label: formatDate(current, { weekday: 'short', month: 'short', day: 'numeric' }),
-      sections: matching,
-    });
-
-    current = new Date(current.getTime() + 86400000);
-  }
-
-  return cards;
-};
 
 const ItineraryViewPage = () => {
   const { id } = useParams();
-  const [trip, setTrip] = useState(getTripById(id));
+  const [trip, setTrip] = useState(null);
+  const [sections, setSections] = useState([]);
   const [viewMode, setViewMode] = useState('list');
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let cancelled = false;
@@ -45,28 +21,48 @@ const ItineraryViewPage = () => {
       try {
         const response = await api.get(`/trips/${id}/itinerary`);
         if (cancelled) return;
-
-        const fallback = getTripById(id);
-        setTrip(
-          hydrateTrip({
-            ...fallback,
-            ...response.data,
-            sections: response.data.sections ?? fallback?.sections ?? [],
-            traveler: fallback?.traveler ?? profileFallback,
-          }),
-        );
+        const data = response.data;
+        setTrip(data);
+        setSections(data.sections ?? []);
       } catch {
         if (!cancelled) {
-          setTrip(getTripById(id));
+          // Try fallback: separate trip + sections calls
+          try {
+            const [tripRes, sectionsRes] = await Promise.all([
+              api.get(`/trips/${id}`),
+              api.get(`/trips/${id}/sections`),
+            ]);
+            if (!cancelled) {
+              setTrip(tripRes.data);
+              setSections(sectionsRes.data ?? []);
+            }
+          } catch {
+            // Final fallback: mock data
+            const mock = getTripById(id);
+            if (!cancelled && mock) {
+              setTrip(mock);
+              setSections(mock.sections ?? []);
+            }
+          }
         }
+      } finally {
+        if (!cancelled) setLoading(false);
       }
     };
 
     loadTrip();
-    return () => {
-      cancelled = true;
-    };
+    return () => { cancelled = true; };
   }, [id]);
+
+  if (loading) {
+    return (
+      <AppLayout>
+        <div className="flex items-center justify-center py-32">
+          <div className="h-8 w-8 animate-spin rounded-full border-2 border-teal-500 border-t-transparent" />
+        </div>
+      </AppLayout>
+    );
+  }
 
   if (!trip) {
     return (
@@ -76,22 +72,44 @@ const ItineraryViewPage = () => {
     );
   }
 
-  const sections = trip.sections ?? [];
-  const dayCards = buildDayCards(trip, sections);
+  const totalBudget = sections.reduce((sum, s) => sum + (s.budget || 0), 0) || trip.budget || 0;
 
   return (
     <AppLayout>
-      <PageIntro
-        badges={[
-          <InfoBadge key="dates">{trip.date_range}</InfoBadge>,
-          <InfoBadge key="destinations">{trip.destinations_count} destinations</InfoBadge>,
-          <InfoBadge key="budget">{formatCurrency(trip.budget)}</InfoBadge>,
-        ]}
-        description={trip.hero_fact || 'A polished itinerary view with both list and day-based reads of the same trip structure.'}
-        eyebrow="Itinerary view"
-        title={trip.name}
-      />
+      {/* Hero cover */}
+      {trip.cover_photo_url && (
+        <div className="relative -mx-4 -mt-4 mb-8 overflow-hidden rounded-b-[36px] sm:-mx-6 lg:-mx-8" style={{ height: 260 }}>
+          <img
+            src={trip.cover_photo_url || coverFallback}
+            alt={trip.name}
+            className="absolute inset-0 h-full w-full object-cover"
+            onError={(e) => { e.currentTarget.src = coverFallback; }}
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
+          <div className="absolute inset-x-6 bottom-8 text-white sm:inset-x-10">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-white/60 mb-2">Itinerary view</p>
+            <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">{trip.name}</h1>
+          </div>
+        </div>
+      )}
 
+      {/* Stats row */}
+      <div className="mb-8 flex flex-wrap gap-3">
+        {trip.start_date && trip.end_date && (
+          <InfoBadge>📅 {formatDateRange(trip.start_date, trip.end_date)}</InfoBadge>
+        )}
+        <InfoBadge>📍 {sections.length} segment{sections.length !== 1 ? 's' : ''}</InfoBadge>
+        <InfoBadge>💰 {formatCurrency(totalBudget)}</InfoBadge>
+        <InfoBadge>📋 {trip.status || 'upcoming'}</InfoBadge>
+      </div>
+
+      {trip.description && (
+        <p className="mb-8 max-w-3xl text-sm leading-7" style={{ color: 'var(--text-secondary)' }}>
+          {trip.description}
+        </p>
+      )}
+
+      {/* View toggle + sections */}
       <PageSection>
         <SectionHeader
           action={
@@ -106,69 +124,119 @@ const ItineraryViewPage = () => {
               </TabButton>
             </div>
           }
-          eyebrow="Read itinerary"
-          title="Switch between trip flow and day flow"
+          eyebrow="Trip flow"
+          title="Your itinerary segments"
         />
 
-        {viewMode === 'list' ? (
+        {sections.length === 0 ? (
+          <EmptyState
+            description="No sections have been added yet. Go to the builder to add your first segment."
+            title="Empty itinerary"
+          />
+        ) : viewMode === 'list' ? (
           <div className="space-y-4">
-            {sections.map((section) => (
-              <article key={section.id} className="rounded-[28px] border border-slate-200/80 bg-white p-5 shadow-[0_18px_50px_rgba(15,23,42,0.06)]">
-                <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-                  <div>
-                    <InfoBadge>{section.type}</InfoBadge>
-                    <h3 className="mt-4 text-3xl font-semibold tracking-[-0.04em] text-slate-950">{section.title}</h3>
-                    <p className="mt-3 text-sm leading-6 text-[var(--text-secondary)]">{section.description}</p>
+            {sections.map((section, i) => {
+              // Parse location from description (format: "Location — activities")
+              const descParts = (section.description || '').split(' — ');
+              const location = descParts.length > 1 ? descParts[0] : null;
+              const details = descParts.length > 1 ? descParts.slice(1).join(' — ') : section.description;
+
+              return (
+                <article
+                  key={section.id}
+                  className="rounded-[28px] border p-5 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_16px_48px_rgba(15,23,42,0.08)]"
+                  style={{ background: 'var(--card-bg)', borderColor: 'var(--card-border)' }}
+                >
+                  <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-3">
+                        <span
+                          className="rounded-full px-3 py-1 text-[11px] font-bold uppercase tracking-wider"
+                          style={{ background: 'var(--accent-soft)', color: 'var(--accent-primary)' }}
+                        >
+                          {section.type || 'segment'}
+                        </span>
+                        <span className="text-xs font-semibold" style={{ color: 'var(--text-muted)' }}>
+                          Section {i + 1}
+                        </span>
+                      </div>
+                      {location && (
+                        <h3 className="text-xl font-bold tracking-tight mb-2" style={{ color: 'var(--text-primary)' }}>
+                          📍 {location}
+                        </h3>
+                      )}
+                      <p className="text-sm leading-7" style={{ color: 'var(--text-secondary)' }}>
+                        {details}
+                      </p>
+                      {section.start_date && (
+                        <div className="mt-3 flex flex-wrap gap-2">
+                          <InfoBadge>{formatDateRange(section.start_date, section.end_date)}</InfoBadge>
+                        </div>
+                      )}
+                    </div>
+                    {section.budget > 0 && (
+                      <div className="rounded-[20px] px-5 py-3 text-right" style={{ background: 'var(--surface)' }}>
+                        <p className="text-[10px] uppercase tracking-[0.16em]" style={{ color: 'var(--text-muted)' }}>Budget</p>
+                        <p className="mt-1 text-xl font-bold" style={{ color: 'var(--text-primary)' }}>{formatCurrency(section.budget)}</p>
+                      </div>
+                    )}
                   </div>
-                  <div className="rounded-[24px] bg-[linear-gradient(180deg,#f8fafc,#eefaf9)] px-4 py-3 text-right">
-                    <p className="text-xs uppercase tracking-[0.16em] text-slate-400">Budget</p>
-                    <p className="mt-2 text-xl font-semibold text-slate-950">{formatCurrency(section.budget)}</p>
-                  </div>
-                </div>
-                <div className="mt-5 flex flex-wrap gap-2">
-                  <InfoBadge>
-                    <MapPin size={14} />
-                    {section.city}
-                  </InfoBadge>
-                  <InfoBadge>{formatDateRange(section.start_date, section.end_date)}</InfoBadge>
-                </div>
-              </article>
-            ))}
+                </article>
+              );
+            })}
           </div>
         ) : (
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-            {dayCards.map((card) => (
-              <article key={card.key} className="rounded-[28px] border border-slate-200/80 bg-white p-5 shadow-[0_18px_50px_rgba(15,23,42,0.06)]">
-                <h3 className="text-2xl font-semibold tracking-[-0.04em] text-slate-950">{card.label}</h3>
-                <div className="mt-4 space-y-3">
-                  {card.sections.length ? (
-                    card.sections.map((section) => (
-                      <div key={`${card.key}-${section.id}`} className="rounded-[22px] bg-slate-50/90 p-3">
-                        <p className="text-sm font-semibold text-slate-900">{section.title}</p>
-                        <p className="mt-1 text-xs text-[var(--text-secondary)]">{section.city}</p>
-                      </div>
-                    ))
-                  ) : (
-                    <p className="text-sm text-[var(--text-secondary)]">No fixed plans</p>
-                  )}
-                </div>
-              </article>
-            ))}
+          /* Calendar / day-based view */
+          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+            {sections.map((section, i) => {
+              const descParts = (section.description || '').split(' — ');
+              const location = descParts.length > 1 ? descParts[0] : `Segment ${i + 1}`;
+              const activities = descParts.length > 1 ? descParts[1]?.split(', ') : [section.description];
+
+              return (
+                <article
+                  key={section.id}
+                  className="rounded-[24px] border p-5 transition hover:-translate-y-0.5"
+                  style={{ background: 'var(--card-bg)', borderColor: 'var(--card-border)' }}
+                >
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="text-lg font-bold" style={{ color: 'var(--text-primary)' }}>📍 {location}</h3>
+                    <span className="text-xs font-bold" style={{ color: 'var(--accent-primary)' }}>
+                      {formatCurrency(section.budget || 0)}
+                    </span>
+                  </div>
+                  <ul className="space-y-1.5">
+                    {(activities || []).map((act, j) => (
+                      <li key={j} className="flex items-start gap-2 text-sm" style={{ color: 'var(--text-secondary)' }}>
+                        <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full" style={{ background: 'var(--accent-primary)' }} />
+                        {act?.trim()}
+                      </li>
+                    ))}
+                  </ul>
+                </article>
+              );
+            })}
           </div>
         )}
       </PageSection>
 
+      {/* Actions */}
       <PageSection>
-        <SectionHeader eyebrow="Keep planning" title="Companion actions" />
+        <SectionHeader eyebrow="Keep planning" title="What's next?" />
         <div className="flex flex-wrap gap-3">
-          <Button to={`/trips/${trip.id}/build`} variant="secondary">
-            Refine builder
+          <Button to={`/trips/${trip.id}/build`}>
+            <Edit3 size={15} />
+            Edit in builder
           </Button>
           <Button to={`/trips/${trip.id}/invoice`} variant="secondary">
-            Open budget view
+            <Receipt size={15} />
+            Budget breakdown
+          </Button>
+          <Button to={`/trips/${trip.id}/checklist`} variant="secondary">
+            ✅ Packing checklist
           </Button>
           <Button to={`/trips/${trip.id}/notes`} variant="secondary">
-            Review notes
+            📝 Trip notes
           </Button>
         </div>
       </PageSection>
