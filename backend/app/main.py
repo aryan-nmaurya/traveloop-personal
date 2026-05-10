@@ -2,7 +2,7 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
-from app.routers import auth, users, dashboard
+from app.routers import auth, users, dashboard, trips
 
 app = FastAPI(title="Traveloop API", version="1.0.0")
 
@@ -16,6 +16,7 @@ app.add_middleware(
 
 app.include_router(auth.router, prefix="/api/v1")
 app.include_router(users.router, prefix="/api/v1")
+app.include_router(trips.router, prefix="/api/v1")
 app.include_router(dashboard.router, prefix="/api/v1")
 
 

@@ -3,6 +3,8 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import LoginPage from './pages/Auth/LoginPage';
 import SignupPage from './pages/Auth/SignupPage';
 import DashboardPage from './pages/Dashboard/DashboardPage';
+import TripsListPage from './pages/Trips/TripsListPage';
+import CreateTripPage from './pages/Trips/CreateTripPage';
 import ProtectedRoute from './components/layout/ProtectedRoute';
 import { AuthProvider } from './context/AuthContext';
 
@@ -16,6 +18,8 @@ function App() {
           
           <Route element={<ProtectedRoute />}>
             <Route path="/" element={<DashboardPage />} />
+            <Route path="/trips" element={<TripsListPage />} />
+            <Route path="/trips/new" element={<CreateTripPage />} />
           </Route>
 
           <Route path="*" element={<Navigate to="/" replace />} />

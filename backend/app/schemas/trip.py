@@ -2,6 +2,26 @@ from datetime import date, datetime
 from pydantic import BaseModel
 
 
+class TripCreate(BaseModel):
+    name: str
+    description: str | None = None
+    start_date: date | None = None
+    end_date: date | None = None
+    cover_photo_url: str | None = None
+    is_public: bool = False
+    budget: float | None = None
+
+
+class TripUpdate(BaseModel):
+    name: str | None = None
+    description: str | None = None
+    start_date: date | None = None
+    end_date: date | None = None
+    cover_photo_url: str | None = None
+    is_public: bool | None = None
+    budget: float | None = None
+
+
 class TripResponse(BaseModel):
     id: int
     user_id: int
@@ -16,6 +36,11 @@ class TripResponse(BaseModel):
     created_at: datetime
 
     model_config = {"from_attributes": True}
+
+
+class TripsListResponse(BaseModel):
+    trips: list[TripResponse]
+    total: int
 
 
 class DashboardResponse(BaseModel):
