@@ -81,6 +81,16 @@ def update_trip(db: Session, trip_id: int, user_id: int, data: TripUpdate) -> Tr
     return _attach_status(trip)
 
 
+def get_trip_with_sections(db: Session, trip_id: int, user_id: int) -> Trip:
+    trip = db.query(Trip).filter(Trip.id == trip_id, Trip.user_id == user_id).first()
+    if not trip:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Trip not found")
+    _attach_status(trip)
+    # sections already lazy-loaded via relationship ordered by order_index
+    _ = trip.sections
+    return trip
+
+
 def delete_trip(db: Session, trip_id: int, user_id: int) -> None:
     trip = db.query(Trip).filter(Trip.id == trip_id, Trip.user_id == user_id).first()
     if not trip:

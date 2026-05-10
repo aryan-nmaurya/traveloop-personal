@@ -18,6 +18,7 @@ class Trip(Base):
     is_public = Column(Boolean, default=False, index=True)
     budget = Column(Numeric(12, 2))
     status = Column(String(20))  # ongoing | upcoming | completed
+    invoice_status = Column(String(20), default="pending")
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 

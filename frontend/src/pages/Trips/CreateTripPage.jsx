@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   ArrowLeft,
   ArrowRight,
@@ -20,6 +20,7 @@ import { formatCurrency } from '../../utils/formatters';
 const CreateTripPage = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const [cities, setCities] = useState(cityDirectory);
   const suggestionRail = useRef(null);
   const [formData, setFormData] = useState({
     name: '',
@@ -33,9 +34,15 @@ const CreateTripPage = () => {
     isPublic: false,
   });
 
+  useEffect(() => {
+    api.get('/cities?limit=100')
+      .then((res) => { if (res.data.cities?.length) setCities(res.data.cities); })
+      .catch(() => {});
+  }, []);
+
   const selectedCity = useMemo(
-    () => cityDirectory.find((city) => city.name === formData.destination) || cityDirectory[0],
-    [formData.destination],
+    () => cities.find((city) => city.name === formData.destination) || cities[0] || cityDirectory[0],
+    [formData.destination, cities],
   );
 
   const handleChange = (event) => {
@@ -122,7 +129,7 @@ const CreateTripPage = () => {
 
             <FormField icon={MapPin} label="Select a place">
               <select name="destination" onChange={handleChange} value={formData.destination}>
-                {cityDirectory.map((city) => (
+                {cities.map((city) => (
                   <option key={city.id} value={city.name}>
                     {city.name}, {city.country}
                   </option>
@@ -221,7 +228,7 @@ const CreateTripPage = () => {
               description="A horizontal inspiration carousel instead of a long vertical stack, matching the requested premium behavior."
             />
             <div className="hide-scrollbar -mx-1 flex gap-4 overflow-x-auto px-1 pb-2" ref={suggestionRail}>
-              {cityDirectory.map((city) => (
+              {cities.map((city) => (
                 <button
                   key={city.id}
                   type="button"

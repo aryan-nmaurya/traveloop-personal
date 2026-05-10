@@ -43,7 +43,7 @@ const ItineraryViewPage = () => {
 
     const loadTrip = async () => {
       try {
-        const response = await api.get(`/trips/${id}`);
+        const response = await api.get(`/trips/${id}/itinerary`);
         if (cancelled) return;
 
         const fallback = getTripById(id);
@@ -51,7 +51,7 @@ const ItineraryViewPage = () => {
           hydrateTrip({
             ...fallback,
             ...response.data,
-            sections: fallback?.sections ?? [],
+            sections: response.data.sections ?? fallback?.sections ?? [],
             traveler: fallback?.traveler ?? profileFallback,
           }),
         );

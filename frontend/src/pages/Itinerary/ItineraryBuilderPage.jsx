@@ -7,56 +7,63 @@ import { Button, EmptyState, FormField, InfoBadge, PageIntro, PageSection, Secti
 import { cityDirectory, getTripById, hydrateTrip, profileFallback } from '../../data/mockData';
 import { formatCurrency, formatDateRange } from '../../utils/formatters';
 
-const defaultSection = (trip) => ({
+const defaultDraft = (trip) => ({
   type: 'stay',
-  city: trip?.sections?.[0]?.city || cityDirectory[0].name,
+  city: cityDirectory[0]?.name ?? '',
   title: '',
   description: '',
-  start_date: trip?.start_date || '',
-  end_date: trip?.end_date || '',
+  start_date: trip?.start_date ?? '',
+  end_date: trip?.end_date ?? '',
   budget: 400,
 });
 
 const ItineraryBuilderPage = () => {
   const { id } = useParams();
-  const [trip, setTrip] = useState(getTripById(id));
-  const [sections, setSections] = useState(getTripById(id)?.sections ?? []);
-  const [draftSection, setDraftSection] = useState(defaultSection(getTripById(id)));
+  const [trip, setTrip] = useState(null);
+  const [sections, setSections] = useState([]);
+  const [cities, setCities] = useState(cityDirectory);
+  const [draftSection, setDraftSection] = useState(defaultDraft(null));
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
 
-    const loadTrip = async () => {
+    const load = async () => {
+      api.get('/cities?limit=100').then((res) => {
+        if (!cancelled && res.data.cities?.length) setCities(res.data.cities);
+      }).catch(() => {});
+
       try {
-        const response = await api.get(`/trips/${id}`);
+        const [tripRes, sectionsRes] = await Promise.all([
+          api.get(`/trips/${id}`),
+          api.get(`/trips/${id}/sections`),
+        ]);
         if (cancelled) return;
 
         const fallback = getTripById(id);
         const hydrated = hydrateTrip({
-          ...fallback,
-          ...response.data,
-          sections: fallback?.sections ?? [],
+          ...(fallback ?? {}),
+          ...tripRes.data,
+          sections: [],
           checklist: fallback?.checklist ?? [],
           notes: fallback?.notes ?? [],
           traveler: fallback?.traveler ?? profileFallback,
         });
-
         setTrip(hydrated);
-        setSections(hydrated.sections ?? []);
-        setDraftSection(defaultSection(hydrated));
+        setSections(sectionsRes.data ?? []);
+        setDraftSection(defaultDraft(tripRes.data));
       } catch {
         const fallback = getTripById(id);
         if (!cancelled && fallback) {
           setTrip(fallback);
           setSections(fallback.sections ?? []);
+          setDraftSection(defaultDraft(fallback));
         }
       }
     };
 
-    loadTrip();
-    return () => {
-      cancelled = true;
-    };
+    load();
+    return () => { cancelled = true; };
   }, [id]);
 
   const handleDraftChange = (event) => {
@@ -64,28 +71,55 @@ const ItineraryBuilderPage = () => {
     setDraftSection((current) => ({ ...current, [name]: value }));
   };
 
-  const handleAddSection = (event) => {
+  const handleAddSection = async (event) => {
     event.preventDefault();
     if (!draftSection.title.trim()) return;
 
-    const nextSection = {
-      ...draftSection,
-      id: `${Date.now()}`,
+    const payload = {
+      type: draftSection.type,
+      description: draftSection.title + (draftSection.description ? ' — ' + draftSection.description : ''),
+      start_date: draftSection.start_date || null,
+      end_date: draftSection.end_date || null,
       budget: Number(draftSection.budget),
+      order_index: sections.length,
     };
-    setSections((current) => [...current, nextSection]);
-    setDraftSection(defaultSection(trip));
+
+    setSaving(true);
+    try {
+      const res = await api.post(`/trips/${id}/sections`, payload);
+      setSections((current) => [...current, res.data]);
+      setDraftSection(defaultDraft(trip));
+    } catch {
+      // fallback: add locally so the UI doesn't break
+      setSections((current) => [...current, { ...payload, id: `local-${Date.now()}` }]);
+      setDraftSection(defaultDraft(trip));
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDelete = async (section) => {
+    if (String(section.id).startsWith('local-')) {
+      setSections((current) => current.filter((s) => s.id !== section.id));
+      return;
+    }
+    try {
+      await api.delete(`/trips/${id}/sections/${section.id}`);
+      setSections((current) => current.filter((s) => s.id !== section.id));
+    } catch {
+      setSections((current) => current.filter((s) => s.id !== section.id));
+    }
   };
 
   if (!trip) {
     return (
       <AppLayout>
-        <EmptyState description="We could not find that trip in the current dataset." title="Trip not found" />
+        <EmptyState description="We could not find that trip." title="Trip not found" />
       </AppLayout>
     );
   }
 
-  const totalBudget = sections.reduce((sum, section) => sum + Number(section.budget ?? 0), 0);
+  const totalBudget = sections.reduce((sum, s) => sum + Number(s.budget ?? 0), 0);
 
   return (
     <AppLayout>
@@ -118,7 +152,7 @@ const ItineraryBuilderPage = () => {
             </FormField>
             <FormField icon={MapPin} label="City">
               <select name="city" value={draftSection.city} onChange={handleDraftChange}>
-                {cityDirectory.map((city) => (
+                {cities.map((city) => (
                   <option key={city.id} value={city.name}>
                     {city.name}
                   </option>
@@ -147,7 +181,7 @@ const ItineraryBuilderPage = () => {
               <input name="budget" min="0" type="number" value={draftSection.budget} onChange={handleDraftChange} />
             </FormField>
             <div className="md:col-span-2">
-              <Button type="submit">Add another section</Button>
+              <Button type="submit" disabled={saving}>{saving ? 'Saving…' : 'Add another section'}</Button>
             </div>
           </form>
         </PageSection>
@@ -191,10 +225,9 @@ const ItineraryBuilderPage = () => {
                   <p className="mt-3 text-sm font-semibold capitalize text-slate-900">{section.type}</p>
                 </div>
                 <div>
-                  <h3 className="text-2xl font-semibold tracking-[-0.04em] text-slate-950">{section.title}</h3>
-                  <p className="mt-2 text-sm leading-6 text-[var(--text-secondary)]">{section.description}</p>
+                  <h3 className="text-2xl font-semibold tracking-[-0.04em] text-slate-950">{section.description || section.title}</h3>
                   <div className="mt-4 flex flex-wrap gap-2">
-                    <InfoBadge>{section.city}</InfoBadge>
+                    {section.city && <InfoBadge>{section.city}</InfoBadge>}
                     <InfoBadge>{formatDateRange(section.start_date, section.end_date)}</InfoBadge>
                     <InfoBadge>{formatCurrency(section.budget)}</InfoBadge>
                   </div>
@@ -202,7 +235,7 @@ const ItineraryBuilderPage = () => {
                 <button
                   type="button"
                   className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-rose-200 bg-rose-50 text-rose-600"
-                  onClick={() => setSections((current) => current.filter((item) => item.id !== section.id))}
+                  onClick={() => handleDelete(section)}
                 >
                   <Trash2 size={16} />
                 </button>

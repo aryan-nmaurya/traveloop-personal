@@ -69,9 +69,9 @@ const LoginPage = () => {
                     <input type="checkbox" />
                     Remember me
                   </label>
-                  <a className="font-medium text-slate-700 transition hover:text-slate-950" href="#">
+                  <Link className="font-medium text-slate-700 transition hover:text-slate-950" to="/forgot-password">
                     Forgot password?
-                  </a>
+                  </Link>
                 </div>
                 <Button className="w-full" type="submit">
                   Sign in

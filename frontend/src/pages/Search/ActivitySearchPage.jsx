@@ -1,29 +1,53 @@
 import { Search, SlidersHorizontal } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import AppLayout from '../../components/layout/AppLayout';
+import api from '../../api/axiosInstance';
 import { Button, EmptyState, PageIntro, PageSection, SearchField, Toolbar } from '../../components/ui/primitives';
 import { activityDirectory, cityDirectory } from '../../data/mockData';
 import { formatCurrency } from '../../utils/formatters';
+
+const ACTIVITY_TYPES = ['All', 'physical', 'cultural', 'food', 'adventure'];
 
 const ActivitySearchPage = () => {
   const [query, setQuery] = useState('');
   const [type, setType] = useState('All');
   const [cityId, setCityId] = useState('All');
   const [maxCost, setMaxCost] = useState(200);
+  const [activities, setActivities] = useState(activityDirectory);
+  const [cities, setCities] = useState(cityDirectory);
   const [selectedActivity, setSelectedActivity] = useState(null);
 
-  const types = ['All', ...new Set(activityDirectory.map((activity) => activity.type))];
+  const fetchActivities = async (params) => {
+    try {
+      const searchParams = new URLSearchParams({ page: 1, limit: 50 });
+      if (params.cityId && params.cityId !== 'All') searchParams.set('city_id', params.cityId);
+      if (params.type && params.type !== 'All') searchParams.set('type', params.type);
+      if (params.maxCost) searchParams.set('max_cost', params.maxCost);
+      const res = await api.get(`/activities?${searchParams}`);
+      setActivities(res.data.activities ?? []);
+    } catch {
+      // keep existing state
+    }
+  };
 
-  const filtered = activityDirectory.filter((activity) => {
-    const matchesQuery =
-      !query ||
-      activity.name.toLowerCase().includes(query.toLowerCase()) ||
-      activity.description.toLowerCase().includes(query.toLowerCase());
-    const matchesType = type === 'All' || activity.type === type;
-    const matchesCity = cityId === 'All' || String(activity.city_id) === String(cityId);
-    const matchesCost = Number(activity.cost) <= Number(maxCost);
-    return matchesQuery && matchesType && matchesCity && matchesCost;
-  });
+  useEffect(() => {
+    api.get('/cities?limit=100')
+      .then((res) => setCities(res.data.cities ?? cityDirectory))
+      .catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    fetchActivities({ cityId, type, maxCost });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cityId, type, maxCost]);
+
+  const filtered = query.trim()
+    ? activities.filter(
+        (a) =>
+          a.name.toLowerCase().includes(query.toLowerCase()) ||
+          (a.description ?? '').toLowerCase().includes(query.toLowerCase()),
+      )
+    : activities;
 
   return (
     <AppLayout>
@@ -45,9 +69,9 @@ const ActivitySearchPage = () => {
           <label className="field-shell min-h-14 rounded-full lg:min-w-[210px]">
             <SlidersHorizontal className="h-4.5 w-4.5 text-slate-400" />
             <select value={type} onChange={(event) => setType(event.target.value)}>
-              {types.map((item) => (
+              {ACTIVITY_TYPES.map((item) => (
                 <option key={item} value={item}>
-                  {item}
+                  {item === 'All' ? 'All types' : item.charAt(0).toUpperCase() + item.slice(1)}
                 </option>
               ))}
             </select>
@@ -55,7 +79,7 @@ const ActivitySearchPage = () => {
           <label className="field-shell min-h-14 rounded-full lg:min-w-[210px]">
             <select value={cityId} onChange={(event) => setCityId(event.target.value)}>
               <option value="All">All cities</option>
-              {cityDirectory.map((city) => (
+              {cities.map((city) => (
                 <option key={city.id} value={city.id}>
                   {city.name}
                 </option>
@@ -72,7 +96,7 @@ const ActivitySearchPage = () => {
       {filtered.length ? (
         <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
           {filtered.map((activity) => {
-            const city = cityDirectory.find((item) => item.id === activity.city_id);
+            const city = cities.find((item) => item.id === activity.city_id);
             return (
               <article
                 key={activity.id}
@@ -84,7 +108,7 @@ const ActivitySearchPage = () => {
                     <div>
                       <h3 className="text-2xl font-semibold tracking-[-0.04em] text-slate-950">{activity.name}</h3>
                       <p className="mt-1 text-sm text-[var(--text-secondary)]">
-                        {city?.name} • {activity.type}
+                        {city?.name ?? '—'} • {activity.type}
                       </p>
                     </div>
                     <span className="rounded-full bg-slate-100 px-3 py-1 text-sm font-semibold text-slate-700">

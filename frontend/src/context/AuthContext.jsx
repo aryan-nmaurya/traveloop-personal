@@ -34,15 +34,17 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     const response = await api.post('/auth/login', { email, password });
-    const { access_token, user: userPayload } = response.data;
+    const { access_token, refresh_token, user: userPayload } = response.data;
     localStorage.setItem('access_token', access_token);
+    if (refresh_token) localStorage.setItem('refresh_token', refresh_token);
     setUser(userPayload ? { ...userPayload, token: access_token } : { ...profileFallback, token: access_token });
   };
 
   const signup = async (userData) => {
     const response = await api.post('/auth/signup', userData);
-    const { access_token, user: userPayload } = response.data;
+    const { access_token, refresh_token, user: userPayload } = response.data;
     localStorage.setItem('access_token', access_token);
+    if (refresh_token) localStorage.setItem('refresh_token', refresh_token);
     setUser(userPayload ? { ...userPayload, token: access_token } : { ...profileFallback, token: access_token });
   };
 
@@ -65,6 +67,7 @@ export const AuthProvider = ({ children }) => {
       console.error('Logout failed', err);
     } finally {
       localStorage.removeItem('access_token');
+      localStorage.removeItem('refresh_token');
       setUser(null);
     }
   };

@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends
+from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from app.dependencies.auth import get_current_user
@@ -8,6 +9,10 @@ from app.schemas.section import TripSectionCreate, TripSectionResponse, TripSect
 from app.services import section_service
 
 router = APIRouter(prefix="/trips/{trip_id}/sections", tags=["sections"])
+
+
+class ActivityLink(BaseModel):
+    activity_id: int
 
 
 @router.get("", response_model=list[TripSectionResponse])
@@ -48,3 +53,26 @@ def delete_section(
     db: Session = Depends(get_db),
 ):
     section_service.delete_section(db, trip_id, section_id, current_user.id)
+
+
+@router.post("/{section_id}/activities", status_code=201)
+def add_activity(
+    trip_id: int,
+    section_id: int,
+    data: ActivityLink,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    section_service.add_activity_to_section(db, trip_id, section_id, current_user.id, data.activity_id)
+    return {"message": "Activity linked"}
+
+
+@router.delete("/{section_id}/activities/{activity_id}", status_code=204)
+def remove_activity(
+    trip_id: int,
+    section_id: int,
+    activity_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    section_service.remove_activity_from_section(db, trip_id, section_id, current_user.id, activity_id)

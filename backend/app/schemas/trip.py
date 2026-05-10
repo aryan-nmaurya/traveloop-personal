@@ -1,6 +1,8 @@
 from datetime import date, datetime
 from pydantic import BaseModel
 
+from app.schemas.section import TripSectionResponse
+
 
 class TripCreate(BaseModel):
     name: str
@@ -33,7 +35,14 @@ class TripResponse(BaseModel):
     is_public: bool
     budget: float | None
     status: str | None
+    invoice_status: str | None
     created_at: datetime
+
+    model_config = {"from_attributes": True}
+
+
+class TripWithSectionsResponse(TripResponse):
+    sections: list[TripSectionResponse] = []
 
     model_config = {"from_attributes": True}
 

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { ArrowUpDown, Plus, Search, Trash2 } from 'lucide-react';
+import { ArrowUpDown, Edit2, Plus, Search, Trash2, X } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import AppLayout from '../../components/layout/AppLayout';
 import TripCard from '../../components/features/TripCard';
@@ -23,6 +23,8 @@ const TripsListPage = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('All');
   const [sortBy, setSortBy] = useState('newest');
+  const [editingTripId, setEditingTripId] = useState(null);
+  const [editDraft, setEditDraft] = useState({});
 
   useEffect(() => {
     let cancelled = false;
@@ -76,6 +78,29 @@ const TripsListPage = () => {
           trips: filteredTrips.filter((trip) => trip.status === status),
         }))
       : [{ status: activeTab, trips: filteredTrips }];
+
+  const handleEditOpen = (trip) => {
+    setEditingTripId(trip.id);
+    setEditDraft({
+      name: trip.name ?? '',
+      description: trip.description ?? '',
+      start_date: trip.start_date ?? '',
+      end_date: trip.end_date ?? '',
+      budget: trip.budget ?? '',
+      cover_photo_url: trip.cover_photo_url ?? '',
+      is_public: trip.is_public ?? false,
+    });
+  };
+
+  const handleEditSave = async (tripId) => {
+    try {
+      const res = await api.put(`/trips/${tripId}`, editDraft);
+      setTrips((current) =>
+        current.map((t) => String(t.id) === String(tripId) ? hydrateTrip({ ...t, ...res.data }) : t)
+      );
+    } catch { /* keep existing state */ }
+    setEditingTripId(null);
+  };
 
   const handleDelete = async (tripId) => {
     try {
@@ -168,6 +193,14 @@ const TripsListPage = () => {
                       </Link>
                       <button
                         type="button"
+                        className="inline-flex items-center gap-1.5 text-slate-600 transition hover:text-slate-950"
+                        onClick={() => handleEditOpen(trip)}
+                      >
+                        <Edit2 size={14} />
+                        Edit
+                      </button>
+                      <button
+                        type="button"
                         className="inline-flex items-center gap-1.5 text-rose-600 transition hover:text-rose-700"
                         onClick={() => handleDelete(trip.id)}
                       >
@@ -175,6 +208,87 @@ const TripsListPage = () => {
                         Delete
                       </button>
                     </div>
+
+                    {editingTripId === trip.id ? (
+                      <div className="rounded-[24px] border border-slate-200/80 bg-white p-5 shadow-[0_12px_40px_rgba(15,23,42,0.07)]">
+                        <div className="mb-4 flex items-center justify-between">
+                          <p className="text-sm font-semibold text-slate-900">Edit trip</p>
+                          <button type="button" onClick={() => setEditingTripId(null)} className="text-slate-400 hover:text-slate-700">
+                            <X size={16} />
+                          </button>
+                        </div>
+                        <div className="grid gap-3 md:grid-cols-2">
+                          <div className="md:col-span-2">
+                            <label className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Trip name</label>
+                            <input
+                              className="mt-1 w-full rounded-[14px] border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-900 outline-none focus:border-slate-400"
+                              value={editDraft.name}
+                              onChange={(e) => setEditDraft((d) => ({ ...d, name: e.target.value }))}
+                            />
+                          </div>
+                          <div className="md:col-span-2">
+                            <label className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Description</label>
+                            <textarea
+                              rows="2"
+                              className="mt-1 w-full rounded-[14px] border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-900 outline-none focus:border-slate-400"
+                              value={editDraft.description}
+                              onChange={(e) => setEditDraft((d) => ({ ...d, description: e.target.value }))}
+                            />
+                          </div>
+                          <div>
+                            <label className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Start date</label>
+                            <input
+                              type="date"
+                              className="mt-1 w-full rounded-[14px] border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-900 outline-none focus:border-slate-400"
+                              value={editDraft.start_date}
+                              onChange={(e) => setEditDraft((d) => ({ ...d, start_date: e.target.value }))}
+                            />
+                          </div>
+                          <div>
+                            <label className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">End date</label>
+                            <input
+                              type="date"
+                              className="mt-1 w-full rounded-[14px] border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-900 outline-none focus:border-slate-400"
+                              value={editDraft.end_date}
+                              onChange={(e) => setEditDraft((d) => ({ ...d, end_date: e.target.value }))}
+                            />
+                          </div>
+                          <div>
+                            <label className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Budget</label>
+                            <input
+                              type="number"
+                              min="0"
+                              className="mt-1 w-full rounded-[14px] border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-900 outline-none focus:border-slate-400"
+                              value={editDraft.budget}
+                              onChange={(e) => setEditDraft((d) => ({ ...d, budget: e.target.value }))}
+                            />
+                          </div>
+                          <div>
+                            <label className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Cover image URL</label>
+                            <input
+                              type="url"
+                              className="mt-1 w-full rounded-[14px] border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-900 outline-none focus:border-slate-400"
+                              value={editDraft.cover_photo_url}
+                              onChange={(e) => setEditDraft((d) => ({ ...d, cover_photo_url: e.target.value }))}
+                            />
+                          </div>
+                          <div className="md:col-span-2">
+                            <label className="flex items-center gap-2 text-sm text-slate-700">
+                              <input
+                                type="checkbox"
+                                checked={editDraft.is_public}
+                                onChange={(e) => setEditDraft((d) => ({ ...d, is_public: e.target.checked }))}
+                              />
+                              Make this trip public in the community gallery
+                            </label>
+                          </div>
+                        </div>
+                        <div className="mt-4 flex gap-3">
+                          <Button size="sm" onClick={() => handleEditSave(trip.id)}>Save changes</Button>
+                          <Button size="sm" variant="secondary" onClick={() => setEditingTripId(null)}>Cancel</Button>
+                        </div>
+                      </div>
+                    ) : null}
                   </div>
                 ))}
               </div>

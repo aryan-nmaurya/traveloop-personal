@@ -36,7 +36,7 @@ def get_invoice(db: Session, trip_id: int, user_id: int) -> dict:
         "trip_id": trip.id,
         "trip_name": trip.name,
         "generated_date": date.today().isoformat(),
-        "payment_status": "pending",
+        "invoice_status": trip.invoice_status or "pending",
         "line_items": line_items,
         "subtotal": round(subtotal, 2),
         "tax": tax,
@@ -50,3 +50,5 @@ def update_invoice_status(db: Session, trip_id: int, user_id: int, new_status: s
     trip = db.query(Trip).filter(Trip.id == trip_id, Trip.user_id == user_id).first()
     if not trip:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Trip not found")
+    trip.invoice_status = new_status
+    db.commit()

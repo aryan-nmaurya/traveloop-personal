@@ -1,46 +1,121 @@
-import { RotateCcw, Share2 } from 'lucide-react';
-import { useState } from 'react';
+import { RotateCcw, Share2, Trash2 } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import AppLayout from '../../components/layout/AppLayout';
-import { Button, EmptyState, FormField, InfoBadge, PageIntro, PageSection, SectionHeader } from '../../components/ui/primitives';
+import api from '../../api/axiosInstance';
+import { Button, EmptyState, FormField, InfoBadge, PageIntro, PageSection, SectionHeader, SkeletonCard } from '../../components/ui/primitives';
 import { getChecklistProgress, getTripById } from '../../data/mockData';
 
 const ChecklistPage = () => {
   const { id } = useParams();
-  const trip = getTripById(id);
-  const [items, setItems] = useState(trip?.checklist ?? []);
+  const mockTrip = getTripById(id);
+  const [trip, setTrip] = useState(mockTrip ?? { name: 'Trip' });
+  const [items, setItems] = useState(mockTrip?.checklist ?? []);
+  const [loading, setLoading] = useState(true);
   const [category, setCategory] = useState('General');
   const [name, setName] = useState('');
 
-  if (!trip) {
-    return (
-      <AppLayout>
-        <EmptyState description="The checklist could not be loaded for this trip." title="Checklist unavailable" />
-      </AppLayout>
-    );
-  }
+  useEffect(() => {
+    let cancelled = false;
+
+    const load = async () => {
+      try {
+        const [tripRes, checklistRes] = await Promise.all([
+          api.get(`/trips/${id}`),
+          api.get(`/trips/${id}/checklist`),
+        ]);
+        if (cancelled) return;
+        setTrip(tripRes.data ?? mockTrip ?? { name: 'Trip' });
+        const apiItems = checklistRes.data?.items ?? checklistRes.data ?? [];
+        if (Array.isArray(apiItems) && apiItems.length > 0) {
+          setItems(apiItems);
+        }
+      } catch {
+        // keep mock data already set in initial state
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+
+    load();
+    return () => { cancelled = true; };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id]);
 
   const grouped = items.reduce((accumulator, item) => {
     accumulator[item.category] = [...(accumulator[item.category] ?? []), item];
     return accumulator;
   }, {});
+
   const progress = getChecklistProgress(items);
 
-  const handleAddItem = (event) => {
+  const handleAddItem = async (event) => {
     event.preventDefault();
     if (!name.trim()) return;
 
-    setItems((current) => [
-      ...current,
-      {
-        id: `${Date.now()}`,
-        name,
-        category,
-        is_packed: false,
-      },
-    ]);
+    const optimisticItem = {
+      id: `local-${Date.now()}`,
+      name,
+      category,
+      is_packed: false,
+    };
+
+    try {
+      const res = await api.post(`/trips/${id}/checklist`, { name, category });
+      setItems((current) => [...current, res.data]);
+    } catch {
+      setItems((current) => [...current, optimisticItem]);
+    }
     setName('');
   };
+
+  const handleToggle = async (item) => {
+    const newValue = !item.is_packed;
+    // Optimistic update
+    setItems((current) =>
+      current.map((entry) => (entry.id === item.id ? { ...entry, is_packed: newValue } : entry))
+    );
+    if (!String(item.id).startsWith('local-')) {
+      try {
+        await api.put(`/trips/${id}/checklist/${item.id}`, { is_packed: newValue });
+      } catch {
+        // Revert on error
+        setItems((current) =>
+          current.map((entry) => (entry.id === item.id ? { ...entry, is_packed: item.is_packed } : entry))
+        );
+      }
+    }
+  };
+
+  const handleDelete = async (item) => {
+    setItems((current) => current.filter((entry) => entry.id !== item.id));
+    if (!String(item.id).startsWith('local-')) {
+      try {
+        await api.delete(`/trips/${id}/checklist/${item.id}`);
+      } catch {
+        // item is already removed optimistically — don't revert, keep UX clean
+      }
+    }
+  };
+
+  const handleResetAll = async () => {
+    setItems((current) => current.map((item) => ({ ...item, is_packed: false })));
+    try {
+      await api.post(`/trips/${id}/checklist/reset`);
+    } catch {
+      // optimistic update already applied
+    }
+  };
+
+  if (loading) {
+    return (
+      <AppLayout>
+        <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+          {[1, 2, 3].map((i) => <SkeletonCard key={i} />)}
+        </div>
+      </AppLayout>
+    );
+  }
 
   return (
     <AppLayout>
@@ -57,7 +132,7 @@ const ChecklistPage = () => {
             <div className="h-full rounded-full bg-[linear-gradient(90deg,#0f766e,#0ea5e9)]" style={{ width: `${progress.percent}%` }} />
           </div>
           <div className="flex flex-wrap gap-3">
-            <Button size="sm" variant="secondary" onClick={() => setItems((current) => current.map((item) => ({ ...item, is_packed: false })))}>
+            <Button size="sm" variant="secondary" onClick={handleResetAll}>
               <RotateCcw size={16} />
               Reset all
             </Button>
@@ -100,22 +175,32 @@ const ChecklistPage = () => {
             />
             <div className="space-y-3">
               {groupItems.map((item) => (
-                <label key={item.id} className="flex items-center gap-3 rounded-[22px] bg-slate-50/90 px-4 py-3 text-sm text-slate-700">
+                <div key={item.id} className="flex items-center gap-3 rounded-[22px] bg-slate-50/90 px-4 py-3 text-sm text-slate-700">
                   <input
                     checked={item.is_packed}
                     type="checkbox"
-                    onChange={() =>
-                      setItems((current) =>
-                        current.map((entry) => (entry.id === item.id ? { ...entry, is_packed: !entry.is_packed } : entry)),
-                      )
-                    }
+                    onChange={() => handleToggle(item)}
                   />
-                  <span>{item.name}</span>
-                </label>
+                  <span className="flex-1">{item.name}</span>
+                  <button
+                    type="button"
+                    className="inline-flex h-7 w-7 items-center justify-center rounded-full text-slate-400 transition hover:bg-rose-50 hover:text-rose-600"
+                    onClick={() => handleDelete(item)}
+                    aria-label={`Delete ${item.name}`}
+                  >
+                    <Trash2 size={13} />
+                  </button>
+                </div>
               ))}
             </div>
           </PageSection>
         ))}
+
+        {Object.keys(grouped).length === 0 && (
+          <div className="xl:col-span-3">
+            <EmptyState description="Add your first item above to get started." title="No checklist items yet" />
+          </div>
+        )}
       </div>
     </AppLayout>
   );

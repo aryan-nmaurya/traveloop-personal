@@ -1,30 +1,63 @@
 import { ArrowUpDown, Copy, Filter, Search } from 'lucide-react';
-import { useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import AppLayout from '../../components/layout/AppLayout';
 import TripCard from '../../components/features/TripCard';
+import api from '../../api/axiosInstance';
 import { Button, EmptyState, PageIntro, PageSection, SearchField, Toolbar } from '../../components/ui/primitives';
 import { communityTrips } from '../../data/mockData';
 
 const CommunityPage = () => {
+  const navigate = useNavigate();
   const [query, setQuery] = useState('');
   const [sortBy, setSortBy] = useState('popular');
+  const [trips, setTrips] = useState(communityTrips);
   const [copiedTrip, setCopiedTrip] = useState(null);
+  const [copying, setCopying] = useState(null);
+  const debounceRef = useRef(null);
 
-  const trips = [...communityTrips]
-    .filter((trip) => {
-      const queryText = query.trim().toLowerCase();
-      return (
-        !queryText ||
-        trip.name.toLowerCase().includes(queryText) ||
-        trip.description.toLowerCase().includes(queryText) ||
-        trip.traveler.name.toLowerCase().includes(queryText)
-      );
-    })
-    .sort((left, right) => {
-      if (sortBy === 'budget') return Number(left.budget) - Number(right.budget);
-      if (sortBy === 'latest') return new Date(right.start_date) - new Date(left.start_date);
-      return right.popularity_score - left.popularity_score;
-    });
+  const fetchTrips = useCallback(async (q, sort) => {
+    try {
+      const params = new URLSearchParams({ page: 1, limit: 20 });
+      if (q) params.set('q', q);
+      if (sort === 'latest') params.set('sort', 'recent');
+      else if (sort === 'popular') params.set('sort', 'popular');
+      const res = await api.get(`/community?${params}`);
+      let data = res.data.trips ?? [];
+      if (sort === 'budget') {
+        data = [...data].sort((a, b) => Number(a.budget ?? 0) - Number(b.budget ?? 0));
+      }
+      setTrips(data);
+    } catch {
+      // keep existing state
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchTrips(query, sortBy);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sortBy]);
+
+  const handleQueryChange = (event) => {
+    const value = event.target.value;
+    setQuery(value);
+    clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => fetchTrips(value, sortBy), 300);
+  };
+
+  const handleCopyTrip = async (trip) => {
+    setCopying(trip.id);
+    try {
+      await api.post(`/trips/${trip.id}/copy`);
+      setCopiedTrip(trip.name);
+      setTimeout(() => setCopiedTrip(null), 4000);
+      setTimeout(() => navigate('/trips'), 1500);
+    } catch {
+      // ignore
+    } finally {
+      setCopying(null);
+    }
+  };
 
   return (
     <AppLayout>
@@ -40,7 +73,7 @@ const CommunityPage = () => {
             <input
               placeholder="Search trips, travelers, or experience styles"
               value={query}
-              onChange={(event) => setQuery(event.target.value)}
+              onChange={handleQueryChange}
             />
           </SearchField>
           <Button className="justify-start lg:min-w-[150px]" variant="secondary">
@@ -65,7 +98,10 @@ const CommunityPage = () => {
               key={trip.id}
               actions={[
                 { label: 'View', to: `/trips/${trip.id}/view`, tone: 'primary' },
-                { label: 'Copy trip', onClick: () => setCopiedTrip(trip.name) },
+                {
+                  label: copying === trip.id ? 'Copying…' : 'Copy trip',
+                  onClick: () => handleCopyTrip(trip),
+                },
               ]}
               trip={trip}
               variant="community"

@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from app.dependencies.auth import get_current_user
 from app.dependencies.db import get_db
 from app.models.user import User
-from app.schemas.trip import TripCreate, TripResponse, TripUpdate, TripsListResponse
+from app.schemas.trip import TripCreate, TripResponse, TripUpdate, TripsListResponse, TripWithSectionsResponse
 from app.services import trip_service
 
 router = APIRouter(prefix="/trips", tags=["trips"])
@@ -57,3 +57,12 @@ def delete_trip(
     db: Session = Depends(get_db),
 ):
     trip_service.delete_trip(db, trip_id, current_user.id)
+
+
+@router.get("/{trip_id}/itinerary", response_model=TripWithSectionsResponse)
+def get_itinerary(
+    trip_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    return trip_service.get_trip_with_sections(db, trip_id, current_user.id)

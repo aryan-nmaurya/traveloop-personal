@@ -1,7 +1,7 @@
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
-from app.models.section import TripSection
+from app.models.section import TripSection, SectionActivity
 from app.models.trip import Trip
 from app.schemas.section import TripSectionCreate, TripSectionUpdate
 
@@ -54,4 +54,29 @@ def delete_section(db: Session, trip_id: int, section_id: int, user_id: int) -> 
     if not section:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Section not found")
     db.delete(section)
+    db.commit()
+
+
+def add_activity_to_section(db: Session, trip_id: int, section_id: int, user_id: int, activity_id: int) -> None:
+    _verify_trip_owner(db, trip_id, user_id)
+    section = db.query(TripSection).filter(TripSection.id == section_id, TripSection.trip_id == trip_id).first()
+    if not section:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Section not found")
+    existing = db.query(SectionActivity).filter(
+        SectionActivity.section_id == section_id, SectionActivity.activity_id == activity_id
+    ).first()
+    if existing:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Activity already linked to this section")
+    db.add(SectionActivity(section_id=section_id, activity_id=activity_id))
+    db.commit()
+
+
+def remove_activity_from_section(db: Session, trip_id: int, section_id: int, user_id: int, activity_id: int) -> None:
+    _verify_trip_owner(db, trip_id, user_id)
+    link = db.query(SectionActivity).filter(
+        SectionActivity.section_id == section_id, SectionActivity.activity_id == activity_id
+    ).first()
+    if not link:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Activity not linked to this section")
+    db.delete(link)
     db.commit()
