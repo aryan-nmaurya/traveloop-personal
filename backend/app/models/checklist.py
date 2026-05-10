@@ -13,6 +13,6 @@ class ChecklistItem(Base):
     name = Column(String(255), nullable=False)
     category = Column(String(100), default="General")
     is_packed = Column(Boolean, default=False)
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    created_at = Column(DateTime(timezone=True), server_default=func.current_timestamp())
 
     trip = relationship("Trip", back_populates="checklist_items")

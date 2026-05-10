@@ -1,0 +1,4 @@
+[project]
+python_version = "3.14"
+python_interpreter = "./venv/bin/python"
+site_package_path = ["./venv/lib/python3.14/site-packages"]

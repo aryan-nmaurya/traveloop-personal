@@ -7,9 +7,9 @@ import { Button, EmptyState, FormField, InfoBadge, PageIntro, PageSection, Secti
 import { cityDirectory, getTripById, hydrateTrip, profileFallback } from '../../data/mockData';
 import { formatCurrency, formatDateRange } from '../../utils/formatters';
 
-const defaultDraft = (trip) => ({
+const defaultDraft = (trip, cities) => ({
   type: 'stay',
-  city: cityDirectory[0]?.name ?? '',
+  city_id: cities?.[0]?.id ?? '',
   title: '',
   description: '',
   start_date: trip?.start_date ?? '',
@@ -22,7 +22,7 @@ const ItineraryBuilderPage = () => {
   const [trip, setTrip] = useState(null);
   const [sections, setSections] = useState([]);
   const [cities, setCities] = useState(cityDirectory);
-  const [draftSection, setDraftSection] = useState(defaultDraft(null));
+  const [draftSection, setDraftSection] = useState(defaultDraft(null, cityDirectory));
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -30,7 +30,10 @@ const ItineraryBuilderPage = () => {
 
     const load = async () => {
       api.get('/cities?limit=100').then((res) => {
-        if (!cancelled && res.data.cities?.length) setCities(res.data.cities);
+        if (!cancelled && res.data.cities?.length) {
+          setCities(res.data.cities);
+          setDraftSection((d) => ({ ...d, city_id: d.city_id || res.data.cities[0]?.id || '' }));
+        }
       }).catch(() => {});
 
       try {
@@ -51,13 +54,13 @@ const ItineraryBuilderPage = () => {
         });
         setTrip(hydrated);
         setSections(sectionsRes.data ?? []);
-        setDraftSection(defaultDraft(tripRes.data));
+        setDraftSection(defaultDraft(tripRes.data, cities));
       } catch {
         const fallback = getTripById(id);
         if (!cancelled && fallback) {
           setTrip(fallback);
           setSections(fallback.sections ?? []);
-          setDraftSection(defaultDraft(fallback));
+          setDraftSection(defaultDraft(fallback, cities));
         }
       }
     };
@@ -75,24 +78,29 @@ const ItineraryBuilderPage = () => {
     event.preventDefault();
     if (!draftSection.title.trim()) return;
 
+    const cityId = draftSection.city_id ? Number(draftSection.city_id) : null;
+    const cityName = cities.find((c) => c.id === cityId)?.name ?? '';
     const payload = {
       type: draftSection.type,
       description: draftSection.title + (draftSection.description ? ' — ' + draftSection.description : ''),
       start_date: draftSection.start_date || null,
       end_date: draftSection.end_date || null,
       budget: Number(draftSection.budget),
+      city_id: cityId,
       order_index: sections.length,
+      // for local display only
+      _cityName: cityName,
     };
 
     setSaving(true);
     try {
       const res = await api.post(`/trips/${id}/sections`, payload);
       setSections((current) => [...current, res.data]);
-      setDraftSection(defaultDraft(trip));
+      setDraftSection(defaultDraft(trip, cities));
     } catch {
       // fallback: add locally so the UI doesn't break
       setSections((current) => [...current, { ...payload, id: `local-${Date.now()}` }]);
-      setDraftSection(defaultDraft(trip));
+      setDraftSection(defaultDraft(trip, cities));
     } finally {
       setSaving(false);
     }
@@ -151,10 +159,10 @@ const ItineraryBuilderPage = () => {
               </select>
             </FormField>
             <FormField icon={MapPin} label="City">
-              <select name="city" value={draftSection.city} onChange={handleDraftChange}>
+              <select name="city_id" value={draftSection.city_id} onChange={handleDraftChange}>
                 {cities.map((city) => (
-                  <option key={city.id} value={city.name}>
-                    {city.name}
+                  <option key={city.id} value={city.id}>
+                    {city.name}{city.country ? `, ${city.country}` : ''}
                   </option>
                 ))}
               </select>
@@ -228,7 +236,9 @@ const ItineraryBuilderPage = () => {
                 <div>
                   <h3 className="text-2xl font-semibold tracking-[-0.04em] text-slate-950">{section.description || section.title}</h3>
                   <div className="mt-4 flex flex-wrap gap-2">
-                    {section.city && <InfoBadge>{section.city}</InfoBadge>}
+                    {(section._cityName || cities.find((c) => c.id === section.city_id)?.name) && (
+                      <InfoBadge>📍 {section._cityName || cities.find((c) => c.id === section.city_id)?.name}</InfoBadge>
+                    )}
                     <InfoBadge>{formatDateRange(section.start_date, section.end_date)}</InfoBadge>
                     <InfoBadge>{formatCurrency(section.budget)}</InfoBadge>
                   </div>

@@ -5,7 +5,13 @@ const ScrollToTop = () => {
   const { pathname } = useLocation();
 
   useEffect(() => {
-    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+    // Temporarily disable smooth scrolling for instant reset
+    document.documentElement.style.scrollBehavior = 'auto';
+    window.scrollTo(0, 0);
+    // Restore CSS behavior
+    setTimeout(() => {
+      document.documentElement.style.scrollBehavior = '';
+    }, 0);
   }, [pathname]);
 
   return null;

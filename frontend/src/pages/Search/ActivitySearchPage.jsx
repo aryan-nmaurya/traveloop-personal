@@ -102,7 +102,7 @@ const ActivitySearchPage = () => {
                 key={activity.id}
                 className="overflow-hidden rounded-[30px] border border-white/80 bg-white/92 shadow-[0_22px_70px_rgba(15,23,42,0.08)] transition duration-300 hover:-translate-y-1.5 hover:shadow-[0_30px_90px_rgba(15,23,42,0.12)]"
               >
-                <img alt={activity.name} className="h-60 w-full object-cover" src={activity.image_url} />
+                <img alt={activity.name} className="h-60 w-full object-cover" src={activity.image_url} onError={(e) => { e.currentTarget.src = 'https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?auto=format&fit=crop&q=80&w=1200'; }} />
                 <div className="space-y-4 p-5">
                   <div className="flex items-start justify-between gap-3">
                     <div>
@@ -118,7 +118,7 @@ const ActivitySearchPage = () => {
                   <p className="text-sm leading-6 text-[var(--text-secondary)]">{activity.description}</p>
                   <div className="flex items-center justify-between gap-3">
                     <span className="text-sm font-semibold text-slate-900">{Math.round(activity.duration_minutes / 60)} hours</span>
-                    <Button size="sm" variant="secondary" onClick={() => setSelectedActivity(activity.name)}>
+                    <Button size="sm" variant="secondary" onClick={() => { setSelectedActivity(activity.name); setTimeout(() => setSelectedActivity(null), 3000); }}>
                       Add activity
                     </Button>
                   </div>

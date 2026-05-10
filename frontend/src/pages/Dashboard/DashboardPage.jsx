@@ -161,6 +161,7 @@ const buildSearchIndex = (trips, cities) => {
 const DashboardPage = () => {
   const navigate = useNavigate();
   const [dashboard, setDashboard] = useState(getDashboardSnapshot());
+  const [liveCities, setLiveCities] = useState(cityDirectory);
   const [loading, setLoading] = useState(true);
   const [heroIndex, setHeroIndex] = useState(0);
   const [tripSearch, setTripSearch] = useState('');
@@ -176,11 +177,16 @@ const DashboardPage = () => {
     let cancelled = false;
     const loadDashboard = async () => {
       try {
-        const tripsResponse = await api.get('/trips?limit=6');
+        const [tripsResponse, citiesResponse] = await Promise.all([
+          api.get('/trips?limit=6'),
+          api.get('/cities?limit=50&sort=popularity'),
+        ]);
         if (cancelled) return;
         const liveTrips = (tripsResponse.data?.trips ?? []).map((trip) => hydrateTrip(trip));
         const fallbackTrips = getSeedTrips().slice(0, 6);
         setDashboard({ trips: liveTrips.length ? liveTrips : fallbackTrips, stats: [] });
+        const fetchedCities = citiesResponse.data?.cities ?? [];
+        if (fetchedCities.length) setLiveCities(fetchedCities);
       } catch {
         if (!cancelled) setDashboard(getDashboardSnapshot());
       } finally {
@@ -208,7 +214,7 @@ const DashboardPage = () => {
     return () => document.removeEventListener('mousedown', handleClick);
   }, []);
 
-  const searchIndex = buildSearchIndex(dashboard.trips ?? [], cityDirectory);
+  const searchIndex = buildSearchIndex(dashboard.trips ?? [], liveCities);
 
   const suggestions = tripSearch.trim().length > 1
     ? searchIndex.filter((item) =>

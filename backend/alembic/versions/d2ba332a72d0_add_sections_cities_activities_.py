@@ -30,7 +30,7 @@ def upgrade() -> None:
     sa.Column('popularity_score', sa.Integer(), nullable=True),
     sa.Column('description', sa.Text(), nullable=True),
     sa.Column('image_url', sa.Text(), nullable=True),
-    sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
+    sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('CURRENT_TIMESTAMP'), nullable=True),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_cities_id'), 'cities', ['id'], unique=False)
@@ -44,7 +44,7 @@ def upgrade() -> None:
     sa.Column('cost', sa.Numeric(precision=10, scale=2), nullable=True),
     sa.Column('duration_minutes', sa.Integer(), nullable=True),
     sa.Column('image_url', sa.Text(), nullable=True),
-    sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
+    sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('CURRENT_TIMESTAMP'), nullable=True),
     sa.ForeignKeyConstraint(['city_id'], ['cities.id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id')
     )
@@ -56,7 +56,7 @@ def upgrade() -> None:
     sa.Column('name', sa.String(length=255), nullable=False),
     sa.Column('category', sa.String(length=100), nullable=True),
     sa.Column('is_packed', sa.Boolean(), nullable=True),
-    sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
+    sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('CURRENT_TIMESTAMP'), nullable=True),
     sa.ForeignKeyConstraint(['trip_id'], ['trips.id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id')
     )
@@ -72,7 +72,7 @@ def upgrade() -> None:
     sa.Column('start_date', sa.Date(), nullable=True),
     sa.Column('end_date', sa.Date(), nullable=True),
     sa.Column('budget', sa.Numeric(precision=12, scale=2), nullable=True),
-    sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
+    sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('CURRENT_TIMESTAMP'), nullable=True),
     sa.ForeignKeyConstraint(['city_id'], ['cities.id'], ondelete='SET NULL'),
     sa.ForeignKeyConstraint(['trip_id'], ['trips.id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id')
@@ -95,8 +95,8 @@ def upgrade() -> None:
     sa.Column('section_id', sa.Integer(), nullable=True),
     sa.Column('title', sa.String(length=255), nullable=True),
     sa.Column('body', sa.Text(), nullable=True),
-    sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
-    sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
+    sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('CURRENT_TIMESTAMP'), nullable=True),
+    sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('CURRENT_TIMESTAMP'), nullable=True),
     sa.ForeignKeyConstraint(['section_id'], ['trip_sections.id'], ondelete='SET NULL'),
     sa.ForeignKeyConstraint(['trip_id'], ['trips.id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id')

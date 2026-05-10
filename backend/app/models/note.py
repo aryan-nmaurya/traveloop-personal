@@ -13,8 +13,8 @@ class TripNote(Base):
     section_id = Column(Integer, ForeignKey("trip_sections.id", ondelete="SET NULL"), nullable=True)
     title = Column(String(255))
     body = Column(Text)
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
-    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+    created_at = Column(DateTime(timezone=True), server_default=func.current_timestamp())
+    updated_at = Column(DateTime(timezone=True), server_default=func.current_timestamp(), onupdate=func.current_timestamp())
 
     trip = relationship("Trip", back_populates="notes")
     section = relationship("TripSection", back_populates="notes")

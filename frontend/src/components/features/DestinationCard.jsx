@@ -5,6 +5,7 @@ const DestinationCard = ({ destination }) => {
         alt={destination.name}
         className="h-72 w-full object-cover transition duration-500 group-hover:scale-105"
         src={destination.image_url}
+        onError={(e) => { e.currentTarget.src = 'https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?auto=format&fit=crop&q=80&w=1200'; }}
       />
       <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(15,23,42,0.02),rgba(15,23,42,0.58))]" />
       <div className="absolute inset-x-5 bottom-5 text-white">

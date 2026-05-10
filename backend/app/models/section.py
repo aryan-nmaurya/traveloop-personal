@@ -17,7 +17,7 @@ class TripSection(Base):
     start_date = Column(Date)
     end_date = Column(Date)
     budget = Column(Numeric(12, 2))
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    created_at = Column(DateTime(timezone=True), server_default=func.current_timestamp())
 
     trip = relationship("Trip", back_populates="sections")
     city = relationship("City", back_populates="sections")

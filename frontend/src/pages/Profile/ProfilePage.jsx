@@ -132,7 +132,7 @@ const ProfilePage = () => {
                 {savedDestinations.map((city) => (
                   <div key={city.id} className="flex items-center gap-4 rounded-[24px] bg-slate-50/90 p-3">
                     {city.image_url && (
-                      <img alt={city.name} className="h-20 w-20 rounded-[20px] object-cover" src={city.image_url} />
+                      <img alt={city.name} className="h-20 w-20 rounded-[20px] object-cover" src={city.image_url} onError={(e) => { e.currentTarget.src = 'https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?auto=format&fit=crop&q=80&w=1200'; }} />
                     )}
                     <div className="flex-1 min-w-0">
                       <h3 className="text-lg font-semibold tracking-[-0.03em] text-slate-950">{city.name}</h3>

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { ArrowRight, Calendar, MapPin, Music, Play, Plus, Sparkles, Star, Wallet } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import api from '../../api/axiosInstance';
 import AppLayout from '../../components/layout/AppLayout';
 import { Button, Eyebrow, PageIntro, PageSection, SectionHeader } from '../../components/ui/primitives';
 import { cn } from '../../utils/cn';
@@ -164,13 +165,36 @@ const MovieItineraryPage = () => {
   const [generating, setGenerating] = useState(false);
   const [generated, setGenerated] = useState(false);
 
-  const handleGenerate = () => {
+  const handleGenerate = async () => {
     setGenerating(true);
     setGenerated(false);
-    setTimeout(() => {
-      setGenerating(false);
+    try {
+      const response = await api.post('/ai/generate_movie_itinerary', {
+        movie_title: selected.title,
+        vibe: selected.vibe,
+        destinations: selected.destinations,
+        duration: selected.duration,
+        budget: selected.budget
+      });
+      
+      if (response.data && response.data.itinerary) {
+        setSelected(current => ({
+          ...current,
+          generated_itinerary: response.data.itinerary
+        }));
+        setGenerated(true);
+      }
+    } catch (error) {
+      console.error("Failed to generate itinerary:", error);
+      // Fallback to static if it fails
+      setSelected(current => ({
+        ...current,
+        generated_itinerary: current.itinerary
+      }));
       setGenerated(true);
-    }, 1800);
+    } finally {
+      setGenerating(false);
+    }
   };
 
   return (
@@ -335,7 +359,7 @@ const MovieItineraryPage = () => {
             }
           />
           <div className="grid gap-4 md:grid-cols-2">
-            {selected.itinerary.map((day, i) => (
+            {(selected.generated_itinerary || selected.itinerary).map((day, i) => (
               <DayCard key={i} day={day} />
             ))}
           </div>

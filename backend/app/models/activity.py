@@ -16,7 +16,7 @@ class Activity(Base):
     cost = Column(Numeric(10, 2))
     duration_minutes = Column(Integer)
     image_url = Column(Text)
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    created_at = Column(DateTime(timezone=True), server_default=func.current_timestamp())
 
     city = relationship("City", back_populates="activities")
     sections = relationship("TripSection", secondary="section_activities", back_populates="activities")

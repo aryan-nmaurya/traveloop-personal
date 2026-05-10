@@ -138,15 +138,6 @@ const Navbar = () => {
                   {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
                   {theme === 'dark' ? 'Light mode' : 'Dark mode'}
                 </button>
-                <Link
-                  className="flex items-center gap-3 rounded-2xl px-3 py-3 text-sm font-medium transition hover:bg-slate-50 dark:hover:bg-slate-800"
-                  style={{ color: 'var(--text-secondary)' }}
-                  onClick={() => setProfileOpen(false)}
-                  to="/profile"
-                >
-                  <Settings2 size={16} />
-                  Preferences
-                </Link>
                 <button
                   type="button"
                   className="flex w-full items-center gap-3 rounded-2xl px-3 py-3 text-sm font-medium text-rose-600 transition hover:bg-rose-50 dark:hover:bg-rose-950/40"

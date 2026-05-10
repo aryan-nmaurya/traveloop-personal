@@ -16,7 +16,7 @@ class City(Base):
     popularity_score = Column(Integer, default=0)
     description = Column(Text)
     image_url = Column(Text)
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    created_at = Column(DateTime(timezone=True), server_default=func.current_timestamp())
 
     activities = relationship("Activity", back_populates="city", cascade="all, delete-orphan")
     sections = relationship("TripSection", back_populates="city")
