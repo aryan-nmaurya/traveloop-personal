@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Navbar from '../../components/layout/Navbar';
+import Footer from '../../components/layout/Footer';
 import TripCard from '../../components/features/TripCard';
 import { Search, Plus, Filter, ArrowUpDown, LayoutGrid } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -125,6 +126,8 @@ const TripsListPage = () => {
           )}
         </section>
       </main>
+      
+      <Footer />
     </div>
   );
 };

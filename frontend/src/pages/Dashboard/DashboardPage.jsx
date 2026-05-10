@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import Navbar from '../../components/layout/Navbar';
 import TripCard from '../../components/features/TripCard';
+import Footer from '../../components/layout/Footer';
 import { Plus, Search, Filter, ChevronLeft, ChevronRight, ArrowUpDown, LayoutGrid } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import api from '../../api/axiosInstance';
@@ -194,6 +195,8 @@ const DashboardPage = () => {
       <button className="floating-cta" onClick={() => navigate('/trips/new')} title="Plan a trip">
         <Plus size={24} /> <span className="cta-text">Plan a trip</span>
       </button>
+
+      <Footer />
     </div>
   );
 };
