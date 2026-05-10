@@ -1,7 +1,7 @@
 from datetime import date
 
 from fastapi import HTTPException, status
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from app.models.trip import Trip
 from app.schemas.trip import TripCreate, TripUpdate
@@ -30,7 +30,7 @@ def get_trips(
     page: int = 1,
     limit: int = 20,
 ) -> tuple[list[Trip], int]:
-    query = db.query(Trip).filter(Trip.user_id == user_id)
+    query = db.query(Trip).options(joinedload(Trip.sections)).filter(Trip.user_id == user_id)
 
     all_trips = query.order_by(Trip.created_at.desc()).all()
     for trip in all_trips:

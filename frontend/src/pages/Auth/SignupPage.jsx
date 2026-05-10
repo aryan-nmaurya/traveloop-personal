@@ -41,10 +41,10 @@ const SignupPage = () => {
       <div className="pointer-events-none absolute inset-x-0 top-0 h-[300px] bg-[radial-gradient(circle_at_top_left,_rgba(14,165,233,0.22),_transparent_28%),radial-gradient(circle_at_top_right,_rgba(13,148,136,0.18),_transparent_24%)]" />
 
       {/* Full-height content wrapper */}
-      <div className="relative z-10 mx-auto flex h-full w-full max-w-[1440px] flex-col px-4 py-1.5 sm:px-6 lg:px-8">
+      <div className="relative z-10 mx-auto flex h-full w-full max-w-[1440px] flex-col px-4 py-4 sm:px-6 lg:px-8">
 
         {/* Logo header */}
-        <div className="flex-shrink-0 pb-1.5">
+        <div className="flex-shrink-0 pb-3">
           <BrandLogo className="self-start" imgClassName="h-7 sm:h-8" />
         </div>
 

@@ -99,9 +99,16 @@ const TripCard = ({ trip, actions = [], variant = 'default', className = '' }) =
           <div className="rounded-[22px] bg-slate-50/90 p-3">
             <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
               <Wallet size={14} />
-              Budget
+              Pricing
             </div>
-            <p className="mt-2 text-sm font-semibold text-slate-900">{typeof trip.budget === 'number' ? formatCurrency(trip.budget) : 'Flexible'}</p>
+            <div className="mt-2 flex flex-wrap items-baseline gap-1.5">
+              <span className="text-sm font-bold text-slate-950">{formatCurrency(trip.total_spent || 0)}</span>
+              {trip.budget ? (
+                <span className="text-[10px] text-slate-400">/ {formatCurrency(trip.budget)} limit</span>
+              ) : (
+                <span className="text-[10px] text-slate-400">spent</span>
+              )}
+            </div>
           </div>
         </div>
 

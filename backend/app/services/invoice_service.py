@@ -27,9 +27,10 @@ def get_invoice(db: Session, trip_id: int, user_id: int) -> dict:
             "amount": amount,
         })
 
-    tax_rate = 0.0
+    tax_rate = 0.05  # Added a 5% tax rate for better realism
     tax = round(subtotal * tax_rate, 2)
-    total = round(subtotal + tax, 2)
+    discount = 0.0  # Future support for discounts
+    total = round(subtotal + tax - discount, 2)
     budget = float(trip.budget) if trip.budget else None
 
     return {
@@ -40,6 +41,7 @@ def get_invoice(db: Session, trip_id: int, user_id: int) -> dict:
         "line_items": line_items,
         "subtotal": round(subtotal, 2),
         "tax": tax,
+        "discount": discount,
         "total": total,
         "budget": budget,
         "budget_remaining": round(budget - total, 2) if budget is not None else None,

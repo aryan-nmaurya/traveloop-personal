@@ -72,7 +72,6 @@ const ItineraryViewPage = () => {
     );
   }
 
-  const totalBudget = sections.reduce((sum, s) => sum + (s.budget || 0), 0) || trip.budget || 0;
 
   return (
     <AppLayout>
@@ -99,7 +98,9 @@ const ItineraryViewPage = () => {
           <InfoBadge>📅 {formatDateRange(trip.start_date, trip.end_date)}</InfoBadge>
         )}
         <InfoBadge>📍 {sections.length} segment{sections.length !== 1 ? 's' : ''}</InfoBadge>
-        <InfoBadge>💰 {formatCurrency(totalBudget)}</InfoBadge>
+        <InfoBadge>
+          💰 Spent: {formatCurrency(trip.total_spent || 0)} {trip.budget ? `/ Limit: ${formatCurrency(trip.budget)}` : ''}
+        </InfoBadge>
         <InfoBadge>📋 {trip.status || 'upcoming'}</InfoBadge>
       </div>
 

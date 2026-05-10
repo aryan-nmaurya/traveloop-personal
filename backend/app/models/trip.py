@@ -26,3 +26,8 @@ class Trip(Base):
     sections = relationship("TripSection", back_populates="trip", cascade="all, delete-orphan", order_by="TripSection.order_index")
     checklist_items = relationship("ChecklistItem", back_populates="trip", cascade="all, delete-orphan")
     notes = relationship("TripNote", back_populates="trip", cascade="all, delete-orphan")
+
+    @property
+    def total_spent(self) -> float:
+        return sum(float(s.budget) if s.budget else 0.0 for s in self.sections)
+

@@ -34,6 +34,7 @@ class TripResponse(BaseModel):
     cover_photo_url: str | None
     is_public: bool
     budget: float | None
+    total_spent: float | None = 0.0
     status: str | None
     invoice_status: str | None
     created_at: datetime

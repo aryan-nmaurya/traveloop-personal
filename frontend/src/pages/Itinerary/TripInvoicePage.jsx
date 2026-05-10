@@ -77,7 +77,7 @@ const TripInvoicePage = () => {
   const lineItems = invoice?.line_items ?? mockInv.line_items ?? [];
   const subtotal = invoice?.subtotal ?? mockInv.subtotal ?? 0;
   const tax = invoice?.tax ?? mockInv.tax ?? 0;
-  const discount = mockInv.discount ?? 0;
+  const discount = invoice?.discount ?? mockInv.discount ?? 0;
   const total = invoice?.total ?? mockInv.total ?? 0;
   const budget = invoice?.budget ?? trip?.budget ?? 0;
   const invoiceStatus = invoice?.invoice_status ?? mockInv.status ?? 'pending';

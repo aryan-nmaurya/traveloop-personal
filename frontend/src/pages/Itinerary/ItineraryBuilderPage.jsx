@@ -135,7 +135,9 @@ const ItineraryBuilderPage = () => {
         badges={[
           <InfoBadge key="range">{trip.date_range}</InfoBadge>,
           <InfoBadge key="status">{trip.status}</InfoBadge>,
-          <InfoBadge key="budget">{formatCurrency(totalBudget)}</InfoBadge>,
+          <InfoBadge key="budget" className={totalBudget > (trip.budget || Infinity) ? 'bg-rose-50 text-rose-700 border-rose-200' : ''}>
+            Spent: {formatCurrency(totalBudget)} {trip.budget ? ` / Limit: ${formatCurrency(trip.budget)}` : ''}
+          </InfoBadge>,
         ]}
         description="The SVG shows a section-first builder. This version keeps that structure while turning each segment into a clearer, more flexible card workflow."
         eyebrow="Build itinerary"

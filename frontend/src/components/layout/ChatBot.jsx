@@ -40,6 +40,8 @@ const ChatBot = () => {
   const bottomRef = useRef(null);
   const inputRef = useRef(null);
   const location = useLocation();
+  const isAuthPage = ['/login', '/signup', '/forgot-password', '/reset-password'].includes(location.pathname);
+  const isDashboard = location.pathname === '/';
 
   // Close chatbot on navigation
   useEffect(() => { setOpen(false); }, [location.pathname]);
@@ -50,6 +52,8 @@ const ChatBot = () => {
       setTimeout(() => inputRef.current?.focus(), 150);
     }
   }, [open, messages]);
+
+  if (isAuthPage) return null;
 
   const sendMessage = async (text) => {
     const userText = (text ?? input).trim();
@@ -172,9 +176,10 @@ const ChatBot = () => {
         type="button"
         className={cn(
           'fixed z-50 inline-flex items-center justify-center rounded-full shadow-[0_20px_60px_rgba(14,116,144,0.36)] transition-all duration-300',
+          isDashboard ? 'right-6' : 'right-6',
           open
-            ? 'bottom-6 right-6 h-12 w-12 bg-slate-900 dark:bg-slate-700 scale-95'
-            : 'bottom-6 right-6 h-14 w-14 bg-[linear-gradient(135deg,#0f766e_0%,#0ea5e9_100%)] hover:-translate-y-1 hover:shadow-[0_28px_70px_rgba(14,116,144,0.44)]',
+            ? cn(isDashboard ? 'bottom-[84px]' : 'bottom-6', 'h-12 w-12 bg-slate-900 dark:bg-slate-700 scale-95')
+            : cn(isDashboard ? 'bottom-[84px]' : 'bottom-6', 'h-14 w-14 bg-[linear-gradient(135deg,#0f766e_0%,#0ea5e9_100%)] hover:-translate-y-1 hover:shadow-[0_28px_70px_rgba(14,116,144,0.44)]'),
         )}
         aria-label={open ? 'Close AI assistant' : 'Open AI travel assistant'}
         onClick={() => setOpen((o) => !o)}
@@ -186,7 +191,8 @@ const ChatBot = () => {
       <div
         className={cn(
           'fixed z-50 flex flex-col overflow-hidden rounded-[24px] border shadow-[0_32px_100px_rgba(15,23,42,0.22)] backdrop-blur transition-all duration-300',
-          'bottom-[76px] right-6 w-[370px] sm:w-[400px]',
+          isDashboard ? 'bottom-[144px]' : 'bottom-[76px]',
+          'right-6 w-[370px] sm:w-[400px]',
           open ? 'scale-100 opacity-100 translate-y-0 pointer-events-auto' : 'scale-95 opacity-0 translate-y-4 pointer-events-none',
         )}
         style={{
