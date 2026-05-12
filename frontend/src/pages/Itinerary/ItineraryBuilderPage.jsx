@@ -88,18 +88,16 @@ const ItineraryBuilderPage = () => {
       budget: Number(draftSection.budget),
       city_id: cityId,
       order_index: sections.length,
-      // for local display only
-      _cityName: cityName,
     };
 
     setSaving(true);
     try {
       const res = await api.post(`/trips/${id}/sections`, payload);
-      setSections((current) => [...current, res.data]);
+      // Attach city name for local display only — not sent to the API.
+      setSections((current) => [...current, { ...res.data, _cityName: cityName }]);
       setDraftSection(defaultDraft(trip, cities));
     } catch {
-      // fallback: add locally so the UI doesn't break
-      setSections((current) => [...current, { ...payload, id: `local-${Date.now()}` }]);
+      setSections((current) => [...current, { ...payload, _cityName: cityName, id: `local-${Date.now()}` }]);
       setDraftSection(defaultDraft(trip, cities));
     } finally {
       setSaving(false);
@@ -139,7 +137,7 @@ const ItineraryBuilderPage = () => {
             Spent: {formatCurrency(totalBudget)} {trip.budget ? ` / Limit: ${formatCurrency(trip.budget)}` : ''}
           </InfoBadge>,
         ]}
-        description="The SVG shows a section-first builder. This version keeps that structure while turning each segment into a clearer, more flexible card workflow."
+        description="Add stops, dates, and budgets for each leg of your journey to build a full itinerary."
         eyebrow="Build itinerary"
         title={trip.name}
       />

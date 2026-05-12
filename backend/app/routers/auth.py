@@ -1,8 +1,9 @@
 from datetime import timedelta
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.orm import Session
 
+from app.core.limiter import limiter
 from app.core.security import create_access_token, decode_token, hash_password
 from app.dependencies.auth import get_current_user
 from app.dependencies.db import get_db
@@ -21,7 +22,8 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 
 
 @router.post("/signup", response_model=SignupResponse, status_code=201)
-def signup(data: SignupRequest, db: Session = Depends(get_db)):
+@limiter.limit("10/minute")
+def signup(request: Request, data: SignupRequest, db: Session = Depends(get_db)):
     user, access_token, refresh_token = auth_service.register_user(db, data)
     return SignupResponse(
         access_token=access_token,
@@ -31,7 +33,8 @@ def signup(data: SignupRequest, db: Session = Depends(get_db)):
 
 
 @router.post("/login", response_model=SignupResponse)
-def login(data: LoginRequest, db: Session = Depends(get_db)):
+@limiter.limit("15/minute")
+def login(request: Request, data: LoginRequest, db: Session = Depends(get_db)):
     user, access_token, refresh_token = auth_service.login_user(db, data)
     return SignupResponse(
         access_token=access_token,
@@ -41,7 +44,8 @@ def login(data: LoginRequest, db: Session = Depends(get_db)):
 
 
 @router.post("/refresh")
-def refresh(data: RefreshRequest, db: Session = Depends(get_db)):
+@limiter.limit("30/minute")
+def refresh(request: Request, data: RefreshRequest, db: Session = Depends(get_db)):
     new_access_token = auth_service.refresh_access_token(db, data.refresh_token)
     return {"access_token": new_access_token, "token_type": "bearer"}
 
@@ -56,22 +60,23 @@ def logout(
 
 
 @router.post("/forgot-password")
-def forgot_password(data: ForgotPasswordRequest, db: Session = Depends(get_db)):
+@limiter.limit("5/minute")
+def forgot_password(request: Request, data: ForgotPasswordRequest, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.email == data.email).first()
     if user:
         token = create_access_token(
             {"sub": str(user.id), "type": "password_reset"},
             expires_delta=timedelta(hours=1),
         )
-        # In production, send token via email. For now it is self-contained.
-        # The token would be delivered as: /reset-password?token=<token>
-        _ = token  # noqa: F841 — suppress "unused" warning until email service added
+        # In production, deliver this token via email as: /reset-password?token=<token>
+        _ = token  # noqa: F841
     # Always return the same message to avoid leaking whether email exists.
     return {"message": "If that email exists, a reset link has been sent."}
 
 
 @router.post("/reset-password")
-def reset_password(data: ResetPasswordRequest, db: Session = Depends(get_db)):
+@limiter.limit("10/minute")
+def reset_password(request: Request, data: ResetPasswordRequest, db: Session = Depends(get_db)):
     payload = decode_token(data.token)
     if not payload or payload.get("type") != "password_reset":
         raise HTTPException(

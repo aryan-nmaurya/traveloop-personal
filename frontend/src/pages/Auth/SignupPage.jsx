@@ -1,4 +1,4 @@
-import { Image as ImageIcon, UserPlus } from 'lucide-react';
+import { UserPlus } from 'lucide-react';
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import BrandLogo from '../../components/layout/BrandLogo';
@@ -16,6 +16,7 @@ const SignupPage = () => {
     password: '',
   });
   const [error, setError] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
   const navigate = useNavigate();
   const { signup } = useAuth();
 
@@ -26,11 +27,14 @@ const SignupPage = () => {
   const handleSignup = async (event) => {
     event.preventDefault();
     setError(null);
+    setSubmitting(true);
     try {
       await signup(formData);
       navigate('/');
     } catch (err) {
       setError(err.response?.data?.detail || 'Signup failed. Please try again.');
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -57,7 +61,7 @@ const SignupPage = () => {
               <span className="inline-flex rounded-full border border-[rgba(13,148,136,0.14)] bg-[rgba(13,148,136,0.08)] px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.24em] text-[var(--accent-primary)]">
                 Registration
               </span>
-              <h1 className="mt-2 text-xl font-semibold tracking-[-0.05em] text-slate-950 sm:text-2xl">Start your journey</h1>
+              <h1 className="mt-2 text-xl font-semibold tracking-[-0.05em] sm:text-2xl" style={{ color: 'var(--text-primary)' }}>Start your journey</h1>
               <p className="mt-1 text-[11px] leading-4 text-[var(--text-secondary)]">
                 Create your account to build premium itineraries and manage budgets in one place.
               </p>
@@ -91,9 +95,9 @@ const SignupPage = () => {
                   <input name="phone" onChange={handleChange} placeholder="+91 9876543210" type="tel" value={formData.phone} />
                 </FormField>
                 <div className="md:col-span-2 mt-2">
-                  <Button className="w-full" size="sm" type="submit">
-                    Create account
-                    <UserPlus size={14} />
+                  <Button className="w-full" size="sm" type="submit" disabled={submitting}>
+                    {submitting ? 'Creating account…' : 'Create account'}
+                    {!submitting && <UserPlus size={14} />}
                   </Button>
                 </div>
               </form>

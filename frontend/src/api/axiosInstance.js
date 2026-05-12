@@ -12,37 +12,52 @@ api.interceptors.request.use((config) => {
     config.headers.Authorization = `Bearer ${token}`;
   }
   return config;
-}, (error) => {
-  return Promise.reject(error);
-});
+}, (error) => Promise.reject(error));
 
-api.interceptors.response.use((response) => {
-  return response;
-}, async (error) => {
-  const originalRequest = error.config;
+// Single shared promise so concurrent 401s only trigger one refresh call.
+let refreshPromise = null;
 
-  if (error.response?.status === 401 && !originalRequest._retry) {
-    originalRequest._retry = true;
-    try {
+api.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    const originalRequest = error.config;
+
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      originalRequest._retry = true;
+
       const refreshToken = localStorage.getItem('refresh_token');
-      if (!refreshToken) throw new Error('No refresh token');
-
-      const res = await axios.post(`${BASE_URL}/auth/refresh`, { refresh_token: refreshToken });
-      const newAccessToken = res.data.access_token;
-      if (newAccessToken) {
-        localStorage.setItem('access_token', newAccessToken);
-        api.defaults.headers.common['Authorization'] = `Bearer ${newAccessToken}`;
-        originalRequest.headers['Authorization'] = `Bearer ${newAccessToken}`;
-        return api(originalRequest);
+      if (!refreshToken) {
+        localStorage.removeItem('access_token');
+        window.location.href = '/login';
+        return Promise.reject(error);
       }
-    } catch {
-      console.warn("Refresh token expired or unauthorized. Logging out...");
-      localStorage.removeItem('access_token');
-      localStorage.removeItem('refresh_token');
-      window.location.href = '/login';
+
+      try {
+        if (!refreshPromise) {
+          refreshPromise = axios
+            .post(`${BASE_URL}/auth/refresh`, { refresh_token: refreshToken })
+            .finally(() => { refreshPromise = null; });
+        }
+
+        const res = await refreshPromise;
+        const newAccessToken = res.data.access_token;
+
+        if (newAccessToken) {
+          localStorage.setItem('access_token', newAccessToken);
+          api.defaults.headers.common['Authorization'] = `Bearer ${newAccessToken}`;
+          originalRequest.headers['Authorization'] = `Bearer ${newAccessToken}`;
+          return api(originalRequest);
+        }
+      } catch {
+        console.warn('Refresh token expired or invalid. Logging out…');
+        localStorage.removeItem('access_token');
+        localStorage.removeItem('refresh_token');
+        window.location.href = '/login';
+      }
     }
-  }
-  return Promise.reject(error);
-});
+
+    return Promise.reject(error);
+  },
+);
 
 export default api;

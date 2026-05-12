@@ -30,6 +30,7 @@ const ChatBot = () => {
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState([
     {
+      id: 'init',
       role: 'assistant',
       content: "Hi! I'm **Traveloop AI** ✈ — your personal travel planner.\n\nAsk me anything about destinations, budgets, activities, or say **\"Plan a trip to [city]\"** and I'll generate a full itinerary you can save!",
     },
@@ -59,7 +60,7 @@ const ChatBot = () => {
     const userText = (text ?? input).trim();
     if (!userText || loading) return;
 
-    const next = [...messages, { role: 'user', content: userText }];
+    const next = [...messages, { id: `user-${Date.now()}`, role: 'user', content: userText }];
     setMessages(next);
     setInput('');
     setLoading(true);
@@ -72,11 +73,11 @@ const ChatBot = () => {
         })),
       });
       const reply = res.data.reply || "Sorry, I couldn't generate a response.";
-      setMessages((prev) => [...prev, { role: 'assistant', content: reply }]);
+      setMessages((prev) => [...prev, { id: `ai-${Date.now()}`, role: 'assistant', content: reply }]);
     } catch {
       setMessages((prev) => [
         ...prev,
-        { role: 'assistant', content: "Sorry, I couldn't connect right now. Please try again." },
+        { id: `err-${Date.now()}`, role: 'assistant', content: "Sorry, I couldn't connect right now. Please try again." },
       ]);
     } finally {
       setLoading(false);
@@ -96,11 +97,15 @@ const ChatBot = () => {
     const cityMatch = userMessages.join(' ').match(/(?:trip to|visit|go to|plan.*?)\s+([A-Z][a-z]+(?:\s[A-Z][a-z]+)*)/i);
     const tripName = cityMatch ? `AI Trip to ${cityMatch[1]}` : 'AI-Generated Trip';
 
+    // Try to extract a budget figure from the conversation (e.g. "₹45,000" or "50000")
+    const budgetMatch = userMessages.join(' ').match(/₹?\s*(\d[\d,]{2,})/);
+    const parsedBudget = budgetMatch ? parseInt(budgetMatch[1].replace(/,/g, ''), 10) : 50000;
+
     try {
       const response = await api.post('/trips', {
         name: tripName,
         description: `Generated from Traveloop AI chat:\n\n${lastAssistant.slice(0, 500)}`,
-        budget: 50000,
+        budget: parsedBudget,
         is_public: false,
       });
 
@@ -142,7 +147,7 @@ const ChatBot = () => {
 
       setMessages((prev) => [
         ...prev,
-        { role: 'assistant', content: `✅ **Trip created!** "${tripName}" with ${Math.max(sectionIndex, 1)} sections.\n\nRedirecting you to the itinerary view…` },
+        { id: `created-${Date.now()}`, role: 'assistant', content: `✅ **Trip created!** "${tripName}" with ${Math.max(sectionIndex, 1)} sections.\n\nRedirecting you to the itinerary view…` },
       ]);
 
       setTimeout(() => {
@@ -153,15 +158,22 @@ const ChatBot = () => {
       console.error('Trip creation failed:', err);
       setMessages((prev) => [
         ...prev,
-        { role: 'assistant', content: "❌ Sorry, I couldn't create the trip. Please try again or use the **Plan a trip** button." },
+        { id: `fail-${Date.now()}`, role: 'assistant', content: "❌ Sorry, I couldn't create the trip. Please try again or use the **Plan a trip** button." },
       ]);
     } finally {
       setCreatingTrip(false);
     }
   };
 
+  // Escape HTML entities FIRST to prevent XSS, then apply safe markdown transforms.
   const renderContent = (text) => {
-    return text
+    const escaped = text
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+    return escaped
       .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
       .replace(/\n•/g, '<br/>•')
       .replace(/\n/g, '<br/>');
@@ -219,6 +231,7 @@ const ChatBot = () => {
             style={{ borderColor: 'var(--input-border)', color: 'var(--text-muted)', background: 'var(--input-bg)' }}
             title="Clear chat"
             onClick={() => setMessages([{
+              id: 'init',
               role: 'assistant',
               content: "Chat cleared! I'm ready to help plan your next adventure. ✈",
             }])}
@@ -228,9 +241,15 @@ const ChatBot = () => {
         </div>
 
         {/* Messages */}
-        <div className="flex-1 overflow-y-auto px-4 py-3 space-y-3" style={{ minHeight: 200 }}>
-          {messages.map((msg, i) => (
-            <div key={i} className={cn('flex gap-2', msg.role === 'user' ? 'flex-row-reverse' : 'flex-row')}>
+        <div
+          className="flex-1 overflow-y-auto px-4 py-3 space-y-3"
+          style={{ minHeight: 200 }}
+          role="log"
+          aria-live="polite"
+          aria-label="Chat messages"
+        >
+          {messages.map((msg) => (
+            <div key={msg.id} className={cn('flex gap-2', msg.role === 'user' ? 'flex-row-reverse' : 'flex-row')}>
               {msg.role === 'assistant' && (
                 <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[linear-gradient(135deg,#0f766e,#0ea5e9)] mt-0.5">
                   <Compass size={12} className="text-white" />

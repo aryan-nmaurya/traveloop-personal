@@ -1,7 +1,6 @@
 /* eslint-disable react-refresh/only-export-components */
 import { createContext, useState, useEffect, useContext } from 'react';
 import api from '../api/axiosInstance';
-import { profileFallback } from '../data/mockData';
 
 const AuthContext = createContext();
 
@@ -22,8 +21,12 @@ export const AuthProvider = ({ children }) => {
       try {
         const response = await api.get('/users/me');
         setUser({ ...response.data, token });
-      } catch {
-        setUser({ ...profileFallback, token });
+      } catch (err) {
+        console.error('Session could not be restored:', err);
+        // Clear the stale session rather than masking the failure with mock data.
+        localStorage.removeItem('access_token');
+        localStorage.removeItem('refresh_token');
+        setUser(null);
       } finally {
         setLoading(false);
       }
@@ -37,7 +40,7 @@ export const AuthProvider = ({ children }) => {
     const { access_token, refresh_token, user: userPayload } = response.data;
     localStorage.setItem('access_token', access_token);
     if (refresh_token) localStorage.setItem('refresh_token', refresh_token);
-    setUser(userPayload ? { ...userPayload, token: access_token } : { ...profileFallback, token: access_token });
+    setUser({ ...userPayload, token: access_token });
   };
 
   const signup = async (userData) => {
@@ -45,7 +48,7 @@ export const AuthProvider = ({ children }) => {
     const { access_token, refresh_token, user: userPayload } = response.data;
     localStorage.setItem('access_token', access_token);
     if (refresh_token) localStorage.setItem('refresh_token', refresh_token);
-    setUser(userPayload ? { ...userPayload, token: access_token } : { ...profileFallback, token: access_token });
+    setUser({ ...userPayload, token: access_token });
   };
 
   const refreshProfile = async () => {
@@ -55,8 +58,8 @@ export const AuthProvider = ({ children }) => {
     try {
       const response = await api.get('/users/me');
       setUser({ ...response.data, token });
-    } catch {
-      setUser((current) => ({ ...(current ?? profileFallback), token }));
+    } catch (err) {
+      console.error('Profile refresh failed:', err);
     }
   };
 

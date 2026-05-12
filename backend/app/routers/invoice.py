@@ -1,4 +1,5 @@
 import io
+from enum import Enum
 
 from fastapi import APIRouter, Depends
 from fastapi.responses import StreamingResponse
@@ -13,8 +14,15 @@ from app.services import invoice_service
 router = APIRouter(prefix="/trips/{trip_id}/invoice", tags=["invoice"])
 
 
+class InvoiceStatus(str, Enum):
+    pending = "pending"
+    paid = "paid"
+    overdue = "overdue"
+    cancelled = "cancelled"
+
+
 class InvoiceStatusUpdate(BaseModel):
-    status: str
+    status: InvoiceStatus
 
 
 @router.get("")
@@ -33,8 +41,8 @@ def update_status(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    invoice_service.update_invoice_status(db, trip_id, current_user.id, data.status)
-    return {"message": f"Invoice status updated to {data.status}"}
+    invoice_service.update_invoice_status(db, trip_id, current_user.id, data.status.value)
+    return {"message": f"Invoice status updated to {data.status.value}"}
 
 
 @router.get("/pdf")

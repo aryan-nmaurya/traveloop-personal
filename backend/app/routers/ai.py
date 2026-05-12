@@ -1,5 +1,6 @@
 import json
 import os
+import random
 import re
 from typing import List
 
@@ -27,9 +28,6 @@ MOCK_CHAT_RESPONSES = [
     "For a **romantic trip**, I'd recommend:\n\n• **Udaipur** — Lake Palace dinners, City Palace at sunset (₹35,000 for 5 days)\n• **Maldives** — Overwater bungalow, snorkelling with manta rays (₹1,20,000 for 5 days)\n• **Andaman Islands** — Radhanagar beach, scuba diving (₹55,000 for 7 days)\n\nWhich vibe suits you — heritage palaces, tropical beaches, or island escapes? 💑",
     "**Solo travel starter kit for India:**\n\n• **Rishikesh** — Yoga, river rafting, bungee jumping — budget ₹15,000 for 5 days\n• **McLeod Ganj** — Dharamshala hills, Tibetan culture, café hopping — ₹12,000 for 5 days\n• **Varanasi** — Ghats at dawn, boat rides, spiritual depth — ₹10,000 for 4 days\n\nAll three are incredibly safe for solo travelers and have amazing hostel communities 🎒",
 ]
-
-_mock_idx = 0
-
 
 class Message(BaseModel):
     role: str
@@ -77,10 +75,7 @@ def _strip_json_fences(text: str) -> str:
 
 @router.post("/chat")
 async def chat(request: ChatRequest):
-    global _mock_idx
-
     messages = [{"role": "system", "content": CHAT_SYSTEM_PROMPT}]
-    # Include all messages from history (skip the initial assistant greeting)
     for m in request.messages:
         if m.role in ("user", "assistant"):
             messages.append({"role": m.role, "content": m.content})
@@ -90,9 +85,7 @@ async def chat(request: ChatRequest):
     if reply:
         return {"reply": reply}
 
-    # Fallback mock rotation
-    _mock_idx = (_mock_idx + 1) % len(MOCK_CHAT_RESPONSES)
-    return {"reply": MOCK_CHAT_RESPONSES[_mock_idx]}
+    return {"reply": random.choice(MOCK_CHAT_RESPONSES)}
 
 
 @router.post("/generate_movie_itinerary")

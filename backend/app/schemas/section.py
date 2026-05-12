@@ -1,6 +1,8 @@
 from datetime import date, datetime
 from pydantic import BaseModel
 
+from app.schemas.activity import ActivityResponse
+
 
 class TripSectionCreate(BaseModel):
     type: str | None = None
@@ -33,5 +35,6 @@ class TripSectionResponse(BaseModel):
     end_date: date | None
     budget: float | None
     created_at: datetime
+    activities: list[ActivityResponse] = []
 
     model_config = {"from_attributes": True}

@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, Navigate, Outlet } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, Outlet, Link } from 'react-router-dom';
 import ScrollToTop from './components/layout/ScrollToTop';
 import { ThemeProvider } from './context/ThemeContext';
 import LoginPage from './pages/Auth/LoginPage';
@@ -29,6 +29,24 @@ const AdminRoute = () => {
   if (loading) return null;
   return user?.role === 'admin' ? <Outlet /> : <Navigate to="/" replace />;
 };
+
+const NotFoundPage = () => (
+  <div
+    className="flex min-h-screen flex-col items-center justify-center gap-6 px-4 text-center"
+    style={{ background: 'var(--background)', color: 'var(--text-primary)' }}
+  >
+    <p className="text-8xl font-bold tracking-tight opacity-20">404</p>
+    <h1 className="text-2xl font-semibold tracking-tight">Page not found</h1>
+    <p style={{ color: 'var(--text-secondary)' }}>The page you&apos;re looking for doesn&apos;t exist or has been moved.</p>
+    <Link
+      to="/"
+      className="inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold text-white"
+      style={{ background: 'linear-gradient(135deg, #0f766e 0%, #0ea5e9 100%)' }}
+    >
+      Back to dashboard
+    </Link>
+  </div>
+);
 
 function App() {
   return (
@@ -63,7 +81,7 @@ function App() {
               </Route>
             </Route>
 
-            <Route path="*" element={<Navigate to="/" replace />} />
+            <Route path="*" element={<NotFoundPage />} />
           </Routes>
         </AuthProvider>
       </Router>

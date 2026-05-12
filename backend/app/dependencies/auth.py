@@ -14,7 +14,9 @@ def get_current_user(
     db: Session = Depends(get_db),
 ) -> User:
     payload = decode_token(credentials.credentials)
-    if not payload or payload.get("type") == "refresh":
+    # Access tokens carry no "type" claim. Any token with an explicit type
+    # (refresh, password_reset, …) must be rejected to prevent token-type confusion.
+    if not payload or payload.get("type") is not None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid or expired token",

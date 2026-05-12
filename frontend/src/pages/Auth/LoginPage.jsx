@@ -9,17 +9,21 @@ const LoginPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
   const navigate = useNavigate();
   const { login } = useAuth();
 
   const handleLogin = async (event) => {
     event.preventDefault();
     setError(null);
+    setSubmitting(true);
     try {
       await login(email, password);
       navigate('/');
     } catch (err) {
       setError(err.response?.data?.detail || 'Invalid email or password');
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -46,7 +50,7 @@ const LoginPage = () => {
               <span className="inline-flex rounded-full border border-[rgba(13,148,136,0.14)] bg-[rgba(13,148,136,0.08)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.26em] text-[var(--accent-primary)]">
                 Login screen
               </span>
-              <h1 className="mt-4 text-3xl font-semibold tracking-[-0.05em] text-slate-950 sm:text-4xl">Welcome back</h1>
+              <h1 className="mt-4 text-3xl font-semibold tracking-[-0.05em] sm:text-4xl" style={{ color: 'var(--text-primary)' }}>Welcome back</h1>
               <p className="mt-2 text-sm leading-6 text-[var(--text-secondary)]">
                 Log in to keep building immersive journeys, budgets, and itinerary flows without losing momentum.
               </p>
@@ -64,18 +68,14 @@ const LoginPage = () => {
                 <FormField icon={Lock} label="Password">
                   <input placeholder="••••••••" type="password" value={password} onChange={(event) => setPassword(event.target.value)} required />
                 </FormField>
-                <div className="flex flex-wrap items-center justify-between gap-3 text-sm">
-                  <label className="flex items-center gap-2 text-[var(--text-secondary)]">
-                    <input type="checkbox" />
-                    Remember me
-                  </label>
-                  <Link className="font-medium text-slate-700 transition hover:text-slate-950" to="/forgot-password">
+                <div className="flex justify-end text-sm">
+                  <Link className="font-medium transition" style={{ color: 'var(--text-secondary)' }} to="/forgot-password">
                     Forgot password?
                   </Link>
                 </div>
-                <Button className="w-full" type="submit">
-                  Sign in
-                  <ArrowRight size={16} />
+                <Button className="w-full" type="submit" disabled={submitting}>
+                  {submitting ? 'Signing in…' : 'Sign in'}
+                  {!submitting && <ArrowRight size={16} />}
                 </Button>
               </form>
 
