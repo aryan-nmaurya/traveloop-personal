@@ -4,13 +4,12 @@ import AppLayout from '../../components/layout/AppLayout';
 import api from '../../api/axiosInstance';
 import { Button, EmptyState, FormField, InfoBadge, PageIntro, PageSection, SectionHeader } from '../../components/ui/primitives';
 import { useAuth } from '../../context/AuthContext';
-import { profileFallback } from '../../data/mockData';
 
 const ProfilePage = () => {
   const { user, setUser, refreshProfile, logout } = useAuth();
   const navigate = useNavigate();
 
-  const baseProfile = { ...profileFallback, ...(user ?? {}) };
+  const baseProfile = user ?? {};
   const [draftForm, setDraftForm] = useState(null);
   const [saved, setSaved] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -21,9 +20,7 @@ const ProfilePage = () => {
   useEffect(() => {
     api.get('/users/me/saved-destinations')
       .then((res) => setSavedDestinations(res.data ?? []))
-      .catch(() => {
-        setSavedDestinations(profileFallback.saved_destinations ?? []);
-      });
+      .catch(() => setSavedDestinations([]));
   }, []);
 
   const handleChange = (event) => {

@@ -112,3 +112,15 @@ def delete_trip(db: Session, trip_id: int, user_id: int) -> None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Trip not found")
     db.delete(trip)
     db.commit()
+
+
+def get_public_trip(db: Session, trip_id: int) -> Trip:
+    trip = (
+        db.query(Trip)
+        .options(joinedload(Trip.sections))
+        .filter(Trip.id == trip_id, Trip.is_public == True)
+        .first()
+    )
+    if not trip:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Trip not found or not public")
+    return attach_status(trip)

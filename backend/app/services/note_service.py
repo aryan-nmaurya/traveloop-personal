@@ -18,9 +18,9 @@ def get_notes(db: Session, trip_id: int, user_id: int, filter: str | None = None
     query = db.query(TripNote).filter(TripNote.trip_id == trip_id)
     if filter == "stop":
         query = query.filter(TripNote.section_id.isnot(None))
-    elif filter == "day":
-        query = query.order_by(TripNote.created_at)
-    return query.order_by(TripNote.created_at.desc()).all()
+
+    order = TripNote.created_at if filter == "day" else TripNote.created_at.desc()
+    return query.order_by(order).all()
 
 
 def create_note(db: Session, trip_id: int, user_id: int, data: TripNoteCreate) -> TripNote:

@@ -1,6 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, Navigate, Outlet, Link } from 'react-router-dom';
 import ScrollToTop from './components/layout/ScrollToTop';
-import { ThemeProvider } from './context/ThemeContext';
 import LoginPage from './pages/Auth/LoginPage';
 import SignupPage from './pages/Auth/SignupPage';
 import ForgotPasswordPage from './pages/Auth/ForgotPasswordPage';
@@ -50,12 +49,11 @@ const NotFoundPage = () => (
 
 function App() {
   return (
-    <ThemeProvider>
-      <Router>
-        <AuthProvider>
-          <ScrollToTop />
-          <ChatBot />
-          <Routes>
+    <Router>
+      <AuthProvider>
+        <ScrollToTop />
+        <ChatBot />
+        <Routes>
             <Route path="/login" element={<LoginPage />} />
             <Route path="/signup" element={<SignupPage />} />
             <Route path="/forgot-password" element={<ForgotPasswordPage />} />
@@ -85,7 +83,6 @@ function App() {
           </Routes>
         </AuthProvider>
       </Router>
-    </ThemeProvider>
   );
 }
 

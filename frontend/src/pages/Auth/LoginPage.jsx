@@ -11,11 +11,12 @@ const LoginPage = () => {
   const [error, setError] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { login, authMessage, clearAuthMessage } = useAuth();
 
   const handleLogin = async (event) => {
     event.preventDefault();
     setError(null);
+    clearAuthMessage();
     setSubmitting(true);
     try {
       await login(email, password);
@@ -54,6 +55,12 @@ const LoginPage = () => {
               <p className="mt-2 text-sm leading-6 text-[var(--text-secondary)]">
                 Log in to keep building immersive journeys, budgets, and itinerary flows without losing momentum.
               </p>
+
+              {authMessage ? (
+                <div className="mt-4 rounded-[22px] border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-700">
+                  {authMessage}
+                </div>
+              ) : null}
 
               {error ? (
                 <div className="mt-4 rounded-[22px] border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700">

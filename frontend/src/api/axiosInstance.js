@@ -28,7 +28,7 @@ api.interceptors.response.use(
       const refreshToken = localStorage.getItem('refresh_token');
       if (!refreshToken) {
         localStorage.removeItem('access_token');
-        window.location.href = '/login';
+        window.dispatchEvent(new Event('session-expired'));
         return Promise.reject(error);
       }
 
@@ -52,7 +52,7 @@ api.interceptors.response.use(
         console.warn('Refresh token expired or invalid. Logging out…');
         localStorage.removeItem('access_token');
         localStorage.removeItem('refresh_token');
-        window.location.href = '/login';
+        window.dispatchEvent(new Event('session-expired'));
       }
     }
 

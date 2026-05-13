@@ -43,15 +43,15 @@ const Stepper = ({ current, onStep, completedSteps }) => (
           className={cn(
             'group flex items-center gap-2 rounded-full border px-4 py-2.5 text-xs font-semibold transition-all duration-300',
             active
-              ? 'border-teal-500/40 bg-teal-500/10 text-teal-600 dark:text-teal-400 shadow-[0_0_20px_rgba(20,184,166,0.12)]'
+              ? 'border-teal-500/40 bg-teal-500/10 text-teal-600 shadow-[0_0_20px_rgba(20,184,166,0.12)]'
               : done
-                ? 'border-emerald-300/40 bg-emerald-50 text-emerald-600 dark:bg-emerald-900/20 dark:border-emerald-700/40 dark:text-emerald-400 cursor-pointer hover:-translate-y-0.5'
-                : 'border-slate-200/60 text-slate-400 dark:border-slate-700/40 dark:text-slate-500 cursor-not-allowed opacity-60',
+                ? 'border-emerald-300/40 bg-emerald-50 text-emerald-600 cursor-pointer hover:-translate-y-0.5'
+                : 'border-slate-200/60 text-slate-400 cursor-not-allowed opacity-60',
           )}
         >
           {done && !active ? <Check size={13} /> : <Icon size={13} />}
           <span className="hidden sm:inline">{step.label}</span>
-          {i < STEPS.length - 1 && <ChevronRight size={12} className="text-slate-300 dark:text-slate-600 ml-1" />}
+          {i < STEPS.length - 1 && <ChevronRight size={12} className="text-slate-300 ml-1" />}
         </button>
       );
     })}
@@ -67,7 +67,7 @@ const SelectionCard = ({ image, title, subtitle, selected, onClick, badge }) => 
       'group relative flex flex-col overflow-hidden rounded-[24px] border text-left transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_20px_60px_rgba(15,23,42,0.15)]',
       selected
         ? 'border-teal-500/50 ring-2 ring-teal-500/20 shadow-[0_20px_60px_rgba(20,184,166,0.15)]'
-        : 'border-slate-200/70 dark:border-slate-700/50',
+        : 'border-slate-200/70',
     )}
   >
     <div className="relative h-36 overflow-hidden">

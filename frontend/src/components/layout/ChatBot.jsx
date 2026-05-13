@@ -17,7 +17,7 @@ const TypingDots = () => (
     {[0, 1, 2].map((i) => (
       <span
         key={i}
-        className="h-2 w-2 rounded-full bg-slate-400 dark:bg-slate-500"
+        className="h-2 w-2 rounded-full bg-slate-400"
         style={{ animation: `chatBounce 1.2s ease-in-out ${i * 0.2}s infinite` }}
       />
     ))}
@@ -190,7 +190,7 @@ const ChatBot = () => {
           'fixed z-50 inline-flex items-center justify-center rounded-full shadow-[0_20px_60px_rgba(14,116,144,0.36)] transition-all duration-300',
           isDashboard ? 'right-6' : 'right-6',
           open
-            ? cn(isDashboard ? 'bottom-[84px]' : 'bottom-6', 'h-12 w-12 bg-slate-900 dark:bg-slate-700 scale-95')
+            ? cn(isDashboard ? 'bottom-[84px]' : 'bottom-6', 'h-12 w-12 bg-slate-900 scale-95')
             : cn(isDashboard ? 'bottom-[84px]' : 'bottom-6', 'h-14 w-14 bg-[linear-gradient(135deg,#0f766e_0%,#0ea5e9_100%)] hover:-translate-y-1 hover:shadow-[0_28px_70px_rgba(14,116,144,0.44)]'),
         )}
         aria-label={open ? 'Close AI assistant' : 'Open AI travel assistant'}

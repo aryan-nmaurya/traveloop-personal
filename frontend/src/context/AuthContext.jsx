@@ -9,6 +9,20 @@ export const useAuth = () => useContext(AuthContext);
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [authMessage, setAuthMessage] = useState(null);
+
+  const clearAuthMessage = () => setAuthMessage(null);
+
+  useEffect(() => {
+    const handleSessionExpired = () => {
+      localStorage.removeItem('access_token');
+      localStorage.removeItem('refresh_token');
+      setUser(null);
+      setAuthMessage('Your session has expired. Please log in again.');
+    };
+    window.addEventListener('session-expired', handleSessionExpired);
+    return () => window.removeEventListener('session-expired', handleSessionExpired);
+  }, []);
 
   useEffect(() => {
     const token = localStorage.getItem('access_token');
@@ -76,7 +90,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, signup, logout, refreshProfile, setUser }}>
+    <AuthContext.Provider value={{ user, loading, login, signup, logout, refreshProfile, setUser, authMessage, clearAuthMessage }}>
       {children}
     </AuthContext.Provider>
   );

@@ -12,6 +12,7 @@ from app.core.security import (
 )
 from app.core.config import settings
 from app.models.refresh_token import RefreshToken
+from app.models.revoked_token import RevokedToken
 from app.models.user import User
 from app.schemas.auth import SignupRequest, LoginRequest
 
@@ -77,10 +78,16 @@ def refresh_access_token(db: Session, token: str) -> str:
     return new_access_token
 
 
-def logout_user(db: Session, user_id: int) -> None:
+def logout_user(db: Session, user_id: int, jti: str | None = None, token_expires_at: datetime | None = None) -> None:
     db.query(RefreshToken).filter(
         RefreshToken.user_id == user_id, RefreshToken.revoked == False
     ).update({"revoked": True})
+
+    if jti and token_expires_at:
+        db.merge(RevokedToken(jti=jti, expires_at=token_expires_at))
+
+    # Prune stale blocklist entries to keep the table lean.
+    db.query(RevokedToken).filter(RevokedToken.expires_at < datetime.now(timezone.utc)).delete()
     db.commit()
 
 

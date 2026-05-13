@@ -5,13 +5,12 @@ import AppLayout from '../../components/layout/AppLayout';
 import TripCard from '../../components/features/TripCard';
 import api from '../../api/axiosInstance';
 import { Button, EmptyState, PageIntro, PageSection, SearchField, Toolbar } from '../../components/ui/primitives';
-import { communityTrips } from '../../data/mockData';
 
 const CommunityPage = () => {
   const navigate = useNavigate();
   const [query, setQuery] = useState('');
   const [sortBy, setSortBy] = useState('popular');
-  const [trips, setTrips] = useState(communityTrips);
+  const [trips, setTrips] = useState([]);
   const [copiedTrip, setCopiedTrip] = useState(null);
   const [copying, setCopying] = useState(null);
   const debounceRef = useRef(null);

@@ -25,7 +25,7 @@ import AppLayout from '../../components/layout/AppLayout';
 import TripCard from '../../components/features/TripCard';
 import { Button, EmptyState, Eyebrow, PageSection, SearchField, SectionHeader, SkeletonCard } from '../../components/ui/primitives';
 import api from '../../api/axiosInstance';
-import { cityDirectory, destinationHighlights, getDashboardSnapshot, getSeedTrips, hydrateTrip } from '../../data/mockData';
+import { cityDirectory, destinationHighlights, hydrateTrip } from '../../data/mockData';
 import { cn } from '../../utils/cn';
 import { formatCurrency } from '../../utils/formatters';
 
@@ -160,7 +160,7 @@ const buildSearchIndex = (trips, cities) => {
 
 const DashboardPage = () => {
   const navigate = useNavigate();
-  const [dashboard, setDashboard] = useState(getDashboardSnapshot());
+  const [dashboard, setDashboard] = useState({ trips: [], stats: [] });
   const [liveCities, setLiveCities] = useState(cityDirectory);
   const [loading, setLoading] = useState(true);
   const [heroIndex, setHeroIndex] = useState(0);
@@ -179,16 +179,15 @@ const DashboardPage = () => {
       try {
         const [tripsResponse, citiesResponse] = await Promise.all([
           api.get('/trips?limit=6'),
-          api.get('/cities?limit=50&sort=popularity'),
+          api.get('/cities?limit=50'),
         ]);
         if (cancelled) return;
         const liveTrips = (tripsResponse.data?.trips ?? []).map((trip) => hydrateTrip(trip));
-        const fallbackTrips = getSeedTrips().slice(0, 6);
-        setDashboard({ trips: liveTrips.length ? liveTrips : fallbackTrips, stats: [] });
+        setDashboard({ trips: liveTrips, stats: [] });
         const fetchedCities = citiesResponse.data?.cities ?? [];
         if (fetchedCities.length) setLiveCities(fetchedCities);
       } catch {
-        if (!cancelled) setDashboard(getDashboardSnapshot());
+        // network error — leave with empty state
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -324,9 +323,9 @@ const DashboardPage = () => {
         <div className="flex flex-col gap-3 lg:flex-row lg:flex-wrap lg:items-center">
           <div className="relative min-w-0 flex-1 lg:min-w-[340px]" ref={searchRef}>
             <label className="field-shell min-h-14 gap-3 rounded-full px-4">
-              <Search className="h-4.5 w-4.5 shrink-0 text-slate-400 dark:text-slate-500" />
+              <Search className="h-4.5 w-4.5 shrink-0 text-slate-400" />
               <input
-                className="w-full border-0 bg-transparent p-0 text-sm text-slate-900 outline-none placeholder:text-slate-400 dark:text-slate-100"
+                className="w-full border-0 bg-transparent p-0 text-sm text-slate-900 outline-none placeholder:text-slate-400"
                 placeholder="Search trips, destinations, cities, adventures…"
                 value={tripSearch}
                 onChange={(e) => { setTripSearch(e.target.value); setShowSuggestions(true); }}
@@ -340,20 +339,20 @@ const DashboardPage = () => {
             </label>
 
             {showSuggestions && suggestions.length > 0 && (
-              <div className="absolute left-0 top-[calc(100%+8px)] z-50 w-full overflow-hidden rounded-[22px] border border-white/80 bg-white/96 shadow-[0_28px_80px_rgba(15,23,42,0.16)] backdrop-blur dark:bg-slate-900/95 dark:border-slate-700/60">
+              <div className="absolute left-0 top-[calc(100%+8px)] z-50 w-full overflow-hidden rounded-[22px] border border-white/80 bg-white/96 shadow-[0_28px_80px_rgba(15,23,42,0.16)] backdrop-blur">
                 {suggestions.map((s, i) => (
                   <button
                     key={i}
                     type="button"
-                    className="flex w-full items-center gap-3 px-4 py-3 text-left transition hover:bg-slate-50 dark:hover:bg-slate-800"
+                    className="flex w-full items-center gap-3 px-4 py-3 text-left transition hover:bg-slate-50"
                     onClick={() => { setTripSearch(s.label); setShowSuggestions(false); navigate(s.href); }}
                   >
-                    <span className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-700">
+                    <span className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-100">
                       {s.type === 'trip' ? <MapPinned size={14} className="text-slate-500" /> : <Compass size={14} className="text-teal-600" />}
                     </span>
                     <div>
-                      <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">{s.label}</p>
-                      <p className="text-xs text-slate-400 dark:text-slate-500">{s.sub}</p>
+                      <p className="text-sm font-semibold text-slate-900">{s.label}</p>
+                      <p className="text-xs text-slate-400">{s.sub}</p>
                     </div>
                   </button>
                 ))}
@@ -426,14 +425,14 @@ const DashboardPage = () => {
             <div className="flex items-center gap-2">
               <button
                 type="button"
-                className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-200/80 bg-white text-slate-700 transition hover:-translate-y-0.5 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
+                className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-200/80 bg-white text-slate-700 transition hover:-translate-y-0.5"
                 onClick={() => moveAdventures('prev')}
               >
                 <ArrowLeft size={16} />
               </button>
               <button
                 type="button"
-                className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-200/80 bg-white text-slate-700 transition hover:-translate-y-0.5 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
+                className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-200/80 bg-white text-slate-700 transition hover:-translate-y-0.5"
                 onClick={() => moveAdventures('next')}
               >
                 <ArrowRight size={16} />
@@ -569,14 +568,14 @@ const DashboardPage = () => {
             <div className="flex items-center gap-2">
               <button
                 type="button"
-                className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-slate-200/80 bg-white text-slate-700 transition hover:-translate-y-0.5 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
+                className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-slate-200/80 bg-white text-slate-700 transition hover:-translate-y-0.5"
                 onClick={() => moveInspiration('prev')}
               >
                 <ArrowLeft size={17} />
               </button>
               <button
                 type="button"
-                className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-slate-200/80 bg-white text-slate-700 transition hover:-translate-y-0.5 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
+                className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-slate-200/80 bg-white text-slate-700 transition hover:-translate-y-0.5"
                 onClick={() => moveInspiration('next')}
               >
                 <ArrowRight size={17} />
@@ -591,7 +590,7 @@ const DashboardPage = () => {
           {destinationHighlights.map((destination) => (
             <article
               key={destination.id}
-              className="min-w-[300px] max-w-[300px] overflow-hidden rounded-[30px] border border-white/80 bg-white/92 shadow-[0_20px_60px_rgba(15,23,42,0.08)] transition duration-300 hover:-translate-y-1.5 sm:min-w-[340px] sm:max-w-[340px] dark:bg-slate-800/90 dark:border-slate-700/60"
+              className="min-w-[300px] max-w-[300px] overflow-hidden rounded-[30px] border border-white/80 bg-white/92 shadow-[0_20px_60px_rgba(15,23,42,0.08)] transition duration-300 hover:-translate-y-1.5 sm:min-w-[340px] sm:max-w-[340px]"
             >
               <div className="relative h-72">
                 <img
@@ -613,7 +612,7 @@ const DashboardPage = () => {
               <div className="flex items-center justify-between gap-3 p-5">
                 <div>
                   <p className="text-xs uppercase tracking-[0.18em] text-slate-400">Trending fare</p>
-                  <p className="mt-1 text-sm font-semibold text-slate-900 dark:text-slate-100">From {formatCurrency(1600)}</p>
+                  <p className="mt-1 text-sm font-semibold text-slate-900">From {formatCurrency(1600)}</p>
                 </div>
                 <Button size="sm" variant="secondary" onClick={() => navigate('/trips/new')}>
                   <Compass size={16} />

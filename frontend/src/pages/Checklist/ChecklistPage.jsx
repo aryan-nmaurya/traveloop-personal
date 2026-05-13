@@ -1,16 +1,15 @@
-import { RotateCcw, Share2, Trash2 } from 'lucide-react';
+import { RotateCcw, Trash2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import AppLayout from '../../components/layout/AppLayout';
 import api from '../../api/axiosInstance';
 import { Button, EmptyState, FormField, InfoBadge, PageIntro, PageSection, SectionHeader, SkeletonCard } from '../../components/ui/primitives';
-import { getChecklistProgress, getTripById } from '../../data/mockData';
+import { getChecklistProgress } from '../../data/mockData';
 
 const ChecklistPage = () => {
   const { id } = useParams();
-  const mockTrip = getTripById(id);
-  const [trip, setTrip] = useState(mockTrip ?? { name: 'Trip' });
-  const [items, setItems] = useState(mockTrip?.checklist ?? []);
+  const [trip, setTrip] = useState({ name: 'Trip' });
+  const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [category, setCategory] = useState('General');
   const [name, setName] = useState('');
@@ -25,13 +24,11 @@ const ChecklistPage = () => {
           api.get(`/trips/${id}/checklist`),
         ]);
         if (cancelled) return;
-        setTrip(tripRes.data ?? mockTrip ?? { name: 'Trip' });
+        setTrip(tripRes.data ?? { name: 'Trip' });
         const apiItems = checklistRes.data?.items ?? checklistRes.data ?? [];
-        if (Array.isArray(apiItems) && apiItems.length > 0) {
-          setItems(apiItems);
-        }
+        setItems(Array.isArray(apiItems) ? apiItems : []);
       } catch {
-        // keep mock data already set in initial state
+        // show empty state — do not fall back to demo data
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -135,10 +132,6 @@ const ChecklistPage = () => {
             <Button size="sm" variant="secondary" onClick={handleResetAll}>
               <RotateCcw size={16} />
               Reset all
-            </Button>
-            <Button size="sm" variant="secondary">
-              <Share2 size={16} />
-              Share checklist
             </Button>
           </div>
         </div>

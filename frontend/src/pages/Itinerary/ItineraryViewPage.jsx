@@ -4,7 +4,7 @@ import { useParams } from 'react-router-dom';
 import AppLayout from '../../components/layout/AppLayout';
 import api from '../../api/axiosInstance';
 import { Button, EmptyState, InfoBadge, PageIntro, PageSection, SectionHeader, TabButton } from '../../components/ui/primitives';
-import { getTripById, hydrateTrip, profileFallback, coverFallback } from '../../data/mockData';
+import { coverFallback } from '../../data/mockData';
 import { formatCurrency, formatDate, formatDateRange } from '../../utils/formatters';
 
 const ItineraryViewPage = () => {
@@ -19,31 +19,22 @@ const ItineraryViewPage = () => {
 
     const loadTrip = async () => {
       try {
-        const response = await api.get(`/trips/${id}/itinerary`);
+        // Try owner endpoint first (includes sections).
+        const res = await api.get(`/trips/${id}/itinerary`);
         if (cancelled) return;
-        const data = response.data;
-        setTrip(data);
-        setSections(data.sections ?? []);
+        setTrip(res.data);
+        setSections(res.data.sections ?? []);
       } catch {
-        if (!cancelled) {
-          // Try fallback: separate trip + sections calls
-          try {
-            const [tripRes, sectionsRes] = await Promise.all([
-              api.get(`/trips/${id}`),
-              api.get(`/trips/${id}/sections`),
-            ]);
-            if (!cancelled) {
-              setTrip(tripRes.data);
-              setSections(sectionsRes.data ?? []);
-            }
-          } catch {
-            // Final fallback: mock data
-            const mock = getTripById(id);
-            if (!cancelled && mock) {
-              setTrip(mock);
-              setSections(mock.sections ?? []);
-            }
+        if (cancelled) return;
+        try {
+          // Fallback: public trip endpoint (community view by non-owner).
+          const res = await api.get(`/trips/${id}/public`);
+          if (!cancelled) {
+            setTrip(res.data);
+            setSections(res.data.sections ?? []);
           }
+        } catch {
+          // Trip not found and not public — leave trip=null for not-found state.
         }
       } finally {
         if (!cancelled) setLoading(false);

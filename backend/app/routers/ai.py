@@ -5,8 +5,12 @@ import re
 from typing import List
 
 import httpx
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends, Request
 from pydantic import BaseModel
+
+from app.core.limiter import limiter
+from app.dependencies.auth import get_current_user
+from app.models.user import User
 
 router = APIRouter(prefix="/ai", tags=["ai"])
 
@@ -74,9 +78,10 @@ def _strip_json_fences(text: str) -> str:
 
 
 @router.post("/chat")
-async def chat(request: ChatRequest):
+@limiter.limit("20/minute")
+async def chat(request: Request, body: ChatRequest, current_user: User = Depends(get_current_user)):
     messages = [{"role": "system", "content": CHAT_SYSTEM_PROMPT}]
-    for m in request.messages:
+    for m in body.messages:
         if m.role in ("user", "assistant"):
             messages.append({"role": m.role, "content": m.content})
 
@@ -89,8 +94,9 @@ async def chat(request: ChatRequest):
 
 
 @router.post("/generate_movie_itinerary")
-async def generate_movie_itinerary(request: MovieItineraryRequest):
-    destinations_str = ", ".join(request.destinations)
+@limiter.limit("10/minute")
+async def generate_movie_itinerary(request: Request, body: MovieItineraryRequest, current_user: User = Depends(get_current_user)):
+    destinations_str = ", ".join(body.destinations)
 
     system_prompt = (
         "You are an elite cinematic travel curator who designs immersive, movie-inspired journeys. "
@@ -104,17 +110,17 @@ async def generate_movie_itinerary(request: MovieItineraryRequest):
     )
 
     user_prompt = (
-        f"Create a cinematic {request.duration} travel itinerary inspired by the movie '{request.movie_title}'.\n"
-        f"Film vibe & mood: {request.vibe}\n"
+        f"Create a cinematic {body.duration} travel itinerary inspired by the movie '{body.movie_title}'.\n"
+        f"Film vibe & mood: {body.vibe}\n"
         f"Key destinations: {destinations_str}\n"
-        f"Total budget: {request.budget}\n\n"
+        f"Total budget: {body.budget}\n\n"
         f"Requirements:\n"
         f"- Capture the EXACT emotional tone and visual atmosphere of the movie\n"
         f"- Include at least 4 activities per day-block (specific, named experiences — not generic ones)\n"
         f"- Name specific hotels, guesthouses, or unique stays that match the film's vibe\n"
         f"- Include at least one hidden gem or cinematic photo spot per segment\n"
-        f"- Split the {request.duration} into {max(3, len(request.destinations))} logical segments across the destinations\n"
-        f"- Budget per segment should sum to approximately {request.budget}\n"
+        f"- Split the {body.duration} into {max(3, len(body.destinations))} logical segments across the destinations\n"
+        f"- Budget per segment should sum to approximately {body.budget}\n"
         f"- Make each activity feel like it could be a scene from the movie\n"
         f"Return ONLY the JSON object, nothing else."
     )
@@ -156,13 +162,13 @@ async def generate_movie_itinerary(request: MovieItineraryRequest):
 
     # Try to match movie title to fallback
     for key, itinerary in movie_fallbacks.items():
-        if key.lower() in request.movie_title.lower() or request.movie_title.lower() in key.lower():
+        if key.lower() in body.movie_title.lower() or body.movie_title.lower() in key.lower():
             return {"itinerary": itinerary}
 
     # Generic rich fallback
     generic = []
     segment_budget = 25000
-    for i, dest in enumerate(request.destinations[:4]):
+    for i, dest in enumerate(body.destinations[:4]):
         days_start = i * 3 + 1
         days_end = days_start + 2
         generic.append({

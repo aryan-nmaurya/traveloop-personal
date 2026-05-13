@@ -129,7 +129,7 @@ const AdminDashboardPage = () => {
                     <td className="px-4 py-4">
                       <span className={cn(
                         'rounded-full px-2.5 py-1 text-xs font-semibold',
-                        u.role === 'admin' ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400' : 'bg-teal-100 text-teal-700 dark:bg-teal-900/30 dark:text-teal-400'
+                        u.role === 'admin' ? 'bg-purple-100 text-purple-700' : 'bg-teal-100 text-teal-700'
                       )}>
                         {u.role}
                       </span>

@@ -4,7 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import AppLayout from '../../components/layout/AppLayout';
 import TripCard from '../../components/features/TripCard';
 import api from '../../api/axiosInstance';
-import { getAllTrips, hydrateTrip, removeLocalTrip } from '../../data/mockData';
+import { hydrateTrip } from '../../data/mockData';
 import { Button, EmptyState, PageIntro, PageSection, SearchField, SectionHeader, SkeletonCard, TabButton, Toolbar } from '../../components/ui/primitives';
 
 const sortOptions = {
@@ -33,13 +33,10 @@ const TripsListPage = () => {
       try {
         const response = await api.get('/trips');
         if (!cancelled) {
-          const liveTrips = (response.data?.trips ?? []).map((trip) => hydrateTrip(trip));
-          setTrips(liveTrips.length ? liveTrips : getAllTrips());
+          setTrips((response.data?.trips ?? []).map((trip) => hydrateTrip(trip)));
         }
       } catch {
-        if (!cancelled) {
-          setTrips(getAllTrips());
-        }
+        // network error — leave trips empty, show empty state
       } finally {
         if (!cancelled) {
           setLoading(false);
@@ -103,12 +100,11 @@ const TripsListPage = () => {
   };
 
   const handleDelete = async (tripId) => {
+    setTrips((current) => current.filter((trip) => String(trip.id) !== String(tripId)));
     try {
       await api.delete(`/trips/${tripId}`);
     } catch {
-      removeLocalTrip(tripId);
-    } finally {
-      setTrips((current) => current.filter((trip) => String(trip.id) !== String(tripId)));
+      // optimistic removal already applied — leave it removed to avoid inconsistency
     }
   };
 

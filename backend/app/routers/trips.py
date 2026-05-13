@@ -66,3 +66,12 @@ def get_itinerary(
     db: Session = Depends(get_db),
 ):
     return trip_service.get_trip_with_sections(db, trip_id, current_user.id)
+
+
+@router.get("/{trip_id}/public", response_model=TripWithSectionsResponse)
+def get_public_trip(
+    trip_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    return trip_service.get_public_trip(db, trip_id)

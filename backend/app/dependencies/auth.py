@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 
 from app.core.security import decode_token
 from app.dependencies.db import get_db
+from app.models.revoked_token import RevokedToken
 from app.models.user import User
 
 security = HTTPBearer()
@@ -21,6 +22,15 @@ def get_current_user(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid or expired token",
         )
+
+    jti = payload.get("jti")
+    if jti:
+        revoked = db.query(RevokedToken).filter(RevokedToken.jti == jti).first()
+        if revoked:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Token has been revoked",
+            )
 
     user_id = payload.get("sub")
     if not user_id:

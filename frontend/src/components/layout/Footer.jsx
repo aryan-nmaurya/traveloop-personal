@@ -17,8 +17,8 @@ const groups = [
     links: [
       { label: 'Activity Search', to: '/search/activities' },
       { label: 'Community', to: '/community' },
-      { label: 'Notes', to: '/trips/101/notes' },
-      { label: 'Checklist', to: '/trips/101/checklist' },
+      { label: 'Movie Trips', to: '/movie-itinerary' },
+      { label: 'My Trips', to: '/trips' },
     ],
   },
   {

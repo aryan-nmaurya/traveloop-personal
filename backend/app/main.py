@@ -1,3 +1,5 @@
+import logging
+
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -8,10 +10,19 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+from app.core.database import engine, Base
 from app.core.limiter import limiter
+import app.models  # noqa: F401 — registers all models with Base.metadata
 from app.routers import auth, users, dashboard, trips, sections, cities, activities, checklist, notes, invoice, community, admin, ai
 
+logger = logging.getLogger(__name__)
+
 app = FastAPI(title="Traveloop API", version="1.0.0")
+
+# ── Create any new tables (idempotent, never drops existing data) ─────────────
+@app.on_event("startup")
+def create_tables():
+    Base.metadata.create_all(bind=engine)
 
 # ── Rate limiting ─────────────────────────────────────────────────────────────
 app.state.limiter = limiter
@@ -32,7 +43,12 @@ app.add_middleware(SecurityHeadersMiddleware)
 # ── CORS ──────────────────────────────────────────────────────────────────────
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://localhost:3000"],
+    allow_origins=[
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -61,4 +77,5 @@ def health():
 
 @app.exception_handler(Exception)
 async def generic_exception_handler(request: Request, exc: Exception):
+    logger.exception("Unhandled error on %s %s", request.method, request.url.path)
     return JSONResponse(status_code=500, content={"detail": "Internal Server Error"})

@@ -87,7 +87,7 @@ const ResetPasswordPage = () => {
                       value={newPassword}
                       onChange={(e) => setNewPassword(e.target.value)}
                       required
-                      minLength={6}
+                      minLength={8}
                     />
                   </FormField>
                   <FormField icon={Lock} label="Confirm new password">
@@ -97,7 +97,7 @@ const ResetPasswordPage = () => {
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
                       required
-                      minLength={6}
+                      minLength={8}
                     />
                   </FormField>
                   <Button className="w-full" type="submit" disabled={loading || !token}>

@@ -1,15 +1,14 @@
-import { Download, FileText, Wallet } from 'lucide-react';
+import { Download, Wallet } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import AppLayout from '../../components/layout/AppLayout';
 import api from '../../api/axiosInstance';
 import { Button, EmptyState, InfoBadge, PageIntro, PageSection, SectionHeader } from '../../components/ui/primitives';
-import { getTripById } from '../../data/mockData';
 import { formatCurrency, toPercent } from '../../utils/formatters';
 
 const TripInvoicePage = () => {
   const { id } = useParams();
-  const [trip, setTrip] = useState(getTripById(id));
+  const [trip, setTrip] = useState(null);
   const [invoice, setInvoice] = useState(null);
   const [markingPaid, setMarkingPaid] = useState(false);
 
@@ -31,7 +30,7 @@ const TripInvoicePage = () => {
         if (cancelled) return;
         setTrip(tripRes.data);
       } catch {
-        if (!cancelled) setTrip(getTripById(id));
+        // trip stays null → shows EmptyState
       }
     };
 
@@ -72,16 +71,14 @@ const TripInvoicePage = () => {
     );
   }
 
-  // Merge real invoice data with mock fallback shape
-  const mockInv = trip?.invoice ?? {};
-  const lineItems = invoice?.line_items ?? mockInv.line_items ?? [];
-  const subtotal = invoice?.subtotal ?? mockInv.subtotal ?? 0;
-  const tax = invoice?.tax ?? mockInv.tax ?? 0;
-  const discount = invoice?.discount ?? mockInv.discount ?? 0;
-  const total = invoice?.total ?? mockInv.total ?? 0;
+  const lineItems = invoice?.line_items ?? [];
+  const subtotal = invoice?.subtotal ?? 0;
+  const tax = invoice?.tax ?? 0;
+  const discount = invoice?.discount ?? 0;
+  const total = invoice?.total ?? 0;
   const budget = invoice?.budget ?? trip?.budget ?? 0;
-  const invoiceStatus = invoice?.invoice_status ?? mockInv.status ?? 'pending';
-  const generatedDate = invoice?.generated_date ?? mockInv.generated_date ?? '—';
+  const invoiceStatus = invoice?.invoice_status ?? 'pending';
+  const generatedDate = invoice?.generated_date ?? '—';
   const usagePercent = toPercent(total, budget || total);
 
   return (
@@ -196,11 +193,7 @@ const TripInvoicePage = () => {
               <div className="space-y-3">
                 <Button className="w-full" variant="secondary" onClick={handleDownload}>
                   <Download size={16} />
-                  Download invoice
-                </Button>
-                <Button className="w-full" variant="secondary" onClick={handleDownload}>
-                  <FileText size={16} />
-                  Export as PDF
+                  Download PDF invoice
                 </Button>
                 <Button className="w-full" onClick={handleMarkPaid} disabled={markingPaid || invoiceStatus === 'paid'}>
                   <Wallet size={16} />

@@ -4,12 +4,11 @@ import { useParams } from 'react-router-dom';
 import AppLayout from '../../components/layout/AppLayout';
 import api from '../../api/axiosInstance';
 import { Button, EmptyState, FormField, PageIntro, PageSection, SectionHeader, TabButton } from '../../components/ui/primitives';
-import { getTripById } from '../../data/mockData';
 import { formatDate } from '../../utils/formatters';
 
 const TripNotesPage = () => {
   const { id } = useParams();
-  const [tripName, setTripName] = useState(getTripById(id)?.name ?? 'Trip');
+  const [tripName, setTripName] = useState('Trip');
   const [notes, setNotes] = useState([]);
   const [filter, setFilter] = useState('all');
   const [draft, setDraft] = useState({ title: '', body: '' });
@@ -34,7 +33,7 @@ const TripNotesPage = () => {
       try {
         const tripRes = await api.get(`/trips/${id}`);
         if (!cancelled) setTripName(tripRes.data.name ?? tripName);
-      } catch { /* use mock fallback name */ }
+      } catch { /* trip name stays as default */ }
       if (!cancelled) fetchNotes();
     };
     load();

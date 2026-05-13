@@ -1,11 +1,12 @@
-from datetime import timedelta
+from datetime import datetime, timedelta, timezone
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
+from fastapi.security import HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session
 
 from app.core.limiter import limiter
 from app.core.security import create_access_token, decode_token, hash_password
-from app.dependencies.auth import get_current_user
+from app.dependencies.auth import get_current_user, security
 from app.dependencies.db import get_db
 from app.models.user import User
 from app.schemas.auth import (
@@ -52,10 +53,15 @@ def refresh(request: Request, data: RefreshRequest, db: Session = Depends(get_db
 
 @router.post("/logout")
 def logout(
+    credentials: HTTPAuthorizationCredentials = Depends(security),
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    auth_service.logout_user(db, current_user.id)
+    payload = decode_token(credentials.credentials)
+    jti = payload.get("jti") if payload else None
+    exp = payload.get("exp") if payload else None
+    expires_at = datetime.fromtimestamp(exp, tz=timezone.utc) if exp else None
+    auth_service.logout_user(db, current_user.id, jti, expires_at)
     return {"message": "Logged out successfully"}
 
 
