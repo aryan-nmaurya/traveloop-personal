@@ -42,6 +42,7 @@ const ProfilePage = () => {
         city: form.city,
         country: form.country,
         language_pref: form.language_pref,
+        profile_photo_url: form.profile_photo_url || null,
       });
       await refreshProfile();
       setSaved(true);
@@ -114,6 +115,26 @@ const ProfilePage = () => {
             <FormField label="Country">
               <input name="country" onChange={handleChange} value={form.country ?? ''} />
             </FormField>
+            <FormField className="md:col-span-2" label="Profile photo URL">
+              <input
+                name="profile_photo_url"
+                onChange={handleChange}
+                value={form.profile_photo_url ?? ''}
+                placeholder="https://example.com/your-photo.jpg"
+                type="url"
+              />
+            </FormField>
+            {form.profile_photo_url && (
+              <div className="md:col-span-2 flex items-center gap-3">
+                <img
+                  alt="Profile preview"
+                  src={form.profile_photo_url}
+                  className="h-14 w-14 rounded-full object-cover border border-slate-200"
+                  onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                />
+                <p className="text-sm text-[var(--text-secondary)]">Photo preview</p>
+              </div>
+            )}
             <div className="md:col-span-2 flex flex-wrap items-center gap-3">
               <Button type="submit" disabled={saving}>{saving ? 'Saving…' : 'Save profile'}</Button>
               {saved ? <InfoBadge>Profile updated.</InfoBadge> : null}

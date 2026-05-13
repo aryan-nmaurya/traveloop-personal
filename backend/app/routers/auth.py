@@ -4,9 +4,14 @@ from fastapi import APIRouter, Depends, HTTPException, Request, status
 from fastapi.security import HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session
 
+import logging
+
+from app.core.config import settings
 from app.core.limiter import limiter
 from app.core.security import create_access_token, decode_token, hash_password
 from app.dependencies.auth import get_current_user, security
+
+logger = logging.getLogger(__name__)
 from app.dependencies.db import get_db
 from app.models.user import User
 from app.schemas.auth import (
@@ -47,8 +52,8 @@ def login(request: Request, data: LoginRequest, db: Session = Depends(get_db)):
 @router.post("/refresh")
 @limiter.limit("30/minute")
 def refresh(request: Request, data: RefreshRequest, db: Session = Depends(get_db)):
-    new_access_token = auth_service.refresh_access_token(db, data.refresh_token)
-    return {"access_token": new_access_token, "token_type": "bearer"}
+    new_access_token, new_refresh_token = auth_service.refresh_access_token(db, data.refresh_token)
+    return {"access_token": new_access_token, "refresh_token": new_refresh_token, "token_type": "bearer"}
 
 
 @router.post("/logout")
@@ -74,9 +79,11 @@ def forgot_password(request: Request, data: ForgotPasswordRequest, db: Session =
             {"sub": str(user.id), "type": "password_reset"},
             expires_delta=timedelta(hours=1),
         )
-        # In production, deliver this token via email as: /reset-password?token=<token>
-        _ = token  # noqa: F841
-    # Always return the same message to avoid leaking whether email exists.
+        reset_url = f"{settings.FRONTEND_URL}/reset-password?token={token}"
+        # TODO: replace with real email delivery (SMTP / SendGrid / SES) in production.
+        # The reset link is logged to stdout so developers can test the flow locally.
+        logger.warning("PASSWORD RESET — %s — %s", user.email, reset_url)
+    # Always return the same generic message to avoid leaking whether an email exists.
     return {"message": "If that email exists, a reset link has been sent."}
 
 

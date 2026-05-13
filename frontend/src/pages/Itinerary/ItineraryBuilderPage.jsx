@@ -1,4 +1,4 @@
-import { Calendar, ListPlus, MapPin, PiggyBank, Route, Trash2 } from 'lucide-react';
+import { Calendar, GripVertical, ListPlus, MapPin, PiggyBank, Route, Trash2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import AppLayout from '../../components/layout/AppLayout';
@@ -14,7 +14,7 @@ const defaultDraft = (trip, cities) => ({
   description: '',
   start_date: trip?.start_date ?? '',
   end_date: trip?.end_date ?? '',
-  budget: 400,
+  budget: 8000,
 });
 
 const ItineraryBuilderPage = () => {
@@ -26,6 +26,8 @@ const ItineraryBuilderPage = () => {
   const [draftSection, setDraftSection] = useState(defaultDraft(null, cityDirectory));
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState(null);
+  const [dragIndex, setDragIndex] = useState(null);
+  const [dragOverIndex, setDragOverIndex] = useState(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -101,6 +103,37 @@ const ItineraryBuilderPage = () => {
     }
   };
 
+  const handleReorder = async (fromIndex, toIndex) => {
+    if (fromIndex === toIndex) return;
+    const reordered = [...sections];
+    const [moved] = reordered.splice(fromIndex, 1);
+    reordered.splice(toIndex, 0, moved);
+    const updated = reordered.map((s, i) => ({ ...s, order_index: i }));
+    setSections(updated);
+    try {
+      await Promise.all(
+        updated.map((s) => api.put(`/trips/${id}/sections/${s.id}`, { order_index: s.order_index }))
+      );
+    } catch {
+      // optimistic — keep reordered state
+    }
+  };
+
+  const handleDragStart = (index) => setDragIndex(index);
+  const handleDragOver = (event, index) => {
+    event.preventDefault();
+    setDragOverIndex(index);
+  };
+  const handleDrop = (index) => {
+    if (dragIndex !== null) handleReorder(dragIndex, index);
+    setDragIndex(null);
+    setDragOverIndex(null);
+  };
+  const handleDragEnd = () => {
+    setDragIndex(null);
+    setDragOverIndex(null);
+  };
+
   if (notFound) {
     return (
       <AppLayout>
@@ -158,6 +191,7 @@ const ItineraryBuilderPage = () => {
                 <option value="stay">Stay</option>
                 <option value="transfer">Transfer</option>
                 <option value="experience">Experience</option>
+                <option value="adventure">Adventure</option>
                 <option value="wellness">Wellness</option>
               </select>
             </FormField>
@@ -190,7 +224,7 @@ const ItineraryBuilderPage = () => {
               <input name="end_date" type="date" value={draftSection.end_date} onChange={handleDraftChange} />
             </FormField>
             <FormField icon={PiggyBank} label="Budget of this section">
-              <input name="budget" min="0" type="number" value={draftSection.budget} onChange={handleDraftChange} />
+              <input name="budget" min="0" step="500" type="number" value={draftSection.budget} onChange={handleDraftChange} />
             </FormField>
             <div className="md:col-span-2">
               <Button type="submit" disabled={saving}>{saving ? 'Saving…' : 'Add section'}</Button>
@@ -230,8 +264,23 @@ const ItineraryBuilderPage = () => {
             {sections.map((section, index) => (
               <article
                 key={section.id}
-                className="grid gap-4 rounded-[28px] border border-slate-200/80 bg-white p-5 shadow-[0_18px_50px_rgba(15,23,42,0.06)] lg:grid-cols-[130px_minmax(0,1fr)_auto]"
+                draggable
+                onDragStart={() => handleDragStart(index)}
+                onDragOver={(e) => handleDragOver(e, index)}
+                onDrop={() => handleDrop(index)}
+                onDragEnd={handleDragEnd}
+                className={`grid gap-4 rounded-[28px] border bg-white p-5 shadow-[0_18px_50px_rgba(15,23,42,0.06)] lg:grid-cols-[28px_130px_minmax(0,1fr)_auto] transition-all duration-150 ${
+                  dragIndex === index ? 'opacity-40 scale-[0.99]' : ''
+                } ${
+                  dragOverIndex === index && dragIndex !== index
+                    ? 'border-teal-400 shadow-[0_0_0_2px_rgba(45,212,191,0.25)]'
+                    : 'border-slate-200/80'
+                }`}
               >
+                {/* Drag handle */}
+                <div className="flex items-center justify-center cursor-grab active:cursor-grabbing text-slate-300 hover:text-slate-500 transition-colors">
+                  <GripVertical size={18} />
+                </div>
                 <div className="rounded-[22px] bg-[linear-gradient(180deg,#ecfeff,#f8fafc)] p-4">
                   <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Section {index + 1}</p>
                   <p className="mt-3 text-sm font-semibold capitalize text-slate-900">{section.type}</p>

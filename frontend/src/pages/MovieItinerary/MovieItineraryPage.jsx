@@ -15,15 +15,15 @@ const movies = [
     mood: 'Carefree, nostalgic, mountain soul',
     image: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?auto=format&fit=crop&w=1600&q=80',
     color: 'from-orange-500 to-pink-600',
-    destinations: ['Manali', 'Udaipur', 'Rajasthan'],
+    destinations: ['Manali', 'Kasol', 'Udaipur', 'Jaisalmer'],
     budget: '₹45,000 – ₹75,000',
     duration: '10 days',
     music: 'Badtameez Dil, Ilahi, Kabira',
     itinerary: [
-      { day: '1–3', location: 'Manali, Himachal Pradesh', activities: ['Rohtang Pass trek at sunrise', 'Solang Valley snow activities', 'Bonfire night with locals at Old Manali', 'River rafting on Beas River'], stay: 'The Himalayan, Manali', budget: '₹12,000' },
-      { day: '4–5', location: 'Kasol & Kheerganga', activities: ['Trek to Kheerganga hot springs', 'Night under the stars at 3,000m', 'Café culture and chilled vibes in Kasol'], stay: 'Alpine Camp, Kasol', budget: '₹6,000' },
-      { day: '6–8', location: 'Udaipur, Rajasthan', activities: ['Boat ride on Lake Pichola', 'Sunset at City Palace', 'Rajasthani dinner under the stars', 'Havelis and bazaar exploration'], stay: 'Taj Lake Palace', budget: '₹20,000' },
-      { day: '9–10', location: 'Jaisalmer Desert', activities: ['Camel safari into Thar Desert', 'Desert camp with folk music', 'Sam Sand Dunes at golden hour', 'Patwon Ki Haveli'], stay: 'Suryagarh Jaisalmer', budget: '₹14,000' },
+      { day: '1–3', location: 'Manali', activities: ['Rohtang Pass trek at sunrise', 'Solang Valley snow activities & paragliding', 'Bonfire night with locals at Old Manali cafes', 'River rafting on Beas River'], stay: 'The Himalayan, Manali', budget: '₹12,000' },
+      { day: '4–5', location: 'Kasol', activities: ['Trek to Kheerganga natural hot springs (12 km)', 'Night camping under stars at 3,000 m', 'Café culture and river walks in Kasol village', 'Hidden Parvati Valley waterfalls trail'], stay: 'Alpine Camp, Kasol', budget: '₹6,000' },
+      { day: '6–8', location: 'Udaipur', activities: ['Shikara boat ride on shimmering Lake Pichola', 'Sunset at City Palace — golden-hour views', 'Rooftop Rajasthani thali dinner with folk music', 'Bazaar walk through havelis and miniature-painting ateliers'], stay: 'Taj Lake Palace', budget: '₹20,000' },
+      { day: '9–10', location: 'Jaisalmer', activities: ['Camel safari into the Thar Desert at sunset', 'Overnight desert camp — folk music & 10,000 stars', 'Sam Sand Dunes photography at golden hour', 'Patwon Ki Haveli intricate sandstone carvings'], stay: 'Suryagarh Jaisalmer', budget: '₹14,000' },
     ],
   },
   {
@@ -34,15 +34,15 @@ const movies = [
     mood: 'Bold, cinematic, transformative',
     image: 'https://images.unsplash.com/photo-1543716091-a840c05249ec?auto=format&fit=crop&w=1600&q=80',
     color: 'from-red-600 to-orange-500',
-    destinations: ['Barcelona', 'Pamplona', 'Seville'],
+    destinations: ['Barcelona', 'Pamplona', 'Seville', 'Marbella'],
     budget: '₹1,80,000 – ₹2,50,000',
     duration: '12 days',
     music: 'Senorita, Ik Junoon, Khaabon Ke Parindey',
     itinerary: [
-      { day: '1–3', location: 'Barcelona, Spain', activities: ['La Sagrada Família at dawn', 'Park Güell mosaic terraces', 'Gothic Quarter evening walk', 'Tapas bar crawl in El Born'], stay: 'Hotel Arts Barcelona', budget: '₹45,000' },
-      { day: '4–5', location: 'Pamplona, Navarra', activities: ['Running of the Bulls experience (or watch safely)', 'Old town fiesta culture', 'Txakoli wine tasting', 'Scenic drive through Basque country'], stay: 'Hotel La Perla Pamplona', budget: '₹28,000' },
-      { day: '6–9', location: 'Seville, Andalusia', activities: ['Real Alcázar palace gardens', 'Flamenco show at Tablao Flamenco', 'Tapas route through Triana market', 'Sunset at Metropol Parasol'], stay: 'Hotel Alfonso XIII', budget: '₹55,000' },
-      { day: '10–12', location: 'Costa del Sol', activities: ['Skydiving over the Mediterranean', 'Marbella old town', 'Boat trip to Benalmádena', 'Final sunset dinner on the beach'], stay: 'Marbella Club Hotel', budget: '₹50,000' },
+      { day: '1–3', location: 'Barcelona', activities: ['La Sagrada Família at dawn — before the crowds', 'Park Güell mosaic terraces with city panorama', 'Gothic Quarter evening tapas bar crawl in El Born', 'Barceloneta beach sunset — the iconic ZNMD scene'], stay: 'Hotel Arts Barcelona', budget: '₹45,000' },
+      { day: '4–5', location: 'Pamplona', activities: ['Running of the Bulls route walk (or watch from balcony)', 'San Fermín old town fiesta exploration', 'Txakoli white wine tasting in Basque country', 'Scenic mountain drive through Pyrenees foothills'], stay: 'Hotel La Perla Pamplona', budget: '₹28,000' },
+      { day: '6–9', location: 'Seville', activities: ['Real Alcázar palace garden photography session', 'Authentic Flamenco show at Tablao El Arenal', 'Late-night tapas route through Triana market', 'Metropol Parasol (Las Setas) at golden sunset'], stay: 'Hotel Alfonso XIII', budget: '₹55,000' },
+      { day: '10–12', location: 'Marbella', activities: ['Tandem skydiving over the Mediterranean coastline', 'Marbella old town white-washed alleys & tapas', 'Boat trip to hidden coves near Benalmádena', 'Final cinematic sunset dinner on Costa del Sol beach'], stay: 'Marbella Club Hotel', budget: '₹50,000' },
     ],
   },
   {
@@ -53,15 +53,15 @@ const movies = [
     mood: 'Raw, introspective, primal',
     image: 'https://images.unsplash.com/photo-1425036458755-dc303a604201?auto=format&fit=crop&w=1600&q=80',
     color: 'from-emerald-600 to-teal-800',
-    destinations: ['Ladakh', 'Spiti Valley', 'Zanskar'],
+    destinations: ['Leh', 'Zanskar', 'Spiti Valley', 'Chitkul'],
     budget: '₹40,000 – ₹65,000',
     duration: '14 days',
     music: 'Society, Hard Sun, Rise',
     itinerary: [
-      { day: '1–3', location: 'Leh, Ladakh', activities: ['Acclimatization day in Leh city', 'Shanti Stupa sunrise meditation', 'Pangong Tso lake (4,350m)', 'Stargazing at Nubra Valley'], stay: 'The Grand Dragon Ladakh', budget: '₹15,000' },
-      { day: '4–6', location: 'Zanskar Valley', activities: ['Off-road drive through Pensi La pass', 'Camping on Zanskar River banks', 'Complete communication blackout — pure nature', 'Phuktal Monastery carved into cliff'], stay: 'Tent camping', budget: '₹10,000' },
-      { day: '7–10', location: 'Spiti Valley', activities: ['Key Monastery at 4,166m', 'Chicham Bridge — Asia\'s highest', 'Pin Valley National Park wildlife', 'Solo walk in Pin-Bhaba pass'], stay: 'Zostel Kaza', budget: '₹14,000' },
-      { day: '11–14', location: 'Chitkul & Sangla', activities: ['Chitkul — last inhabited Indian village', 'Apple orchard walks', 'River trout fishing', 'Complete digital detox'], stay: 'Himalayan homestay', budget: '₹10,000' },
+      { day: '1–3', location: 'Leh', activities: ['Acclimatization day — slow walks and Leh market', 'Shanti Stupa sunrise meditation at 3,500 m', 'Pangong Tso lake day trip — colours shift blue to green', 'Stargazing at Nubra Valley sand dunes'], stay: 'The Grand Dragon Ladakh', budget: '₹15,000' },
+      { day: '4–6', location: 'Zanskar', activities: ['Off-road drive through remote Pensi La pass', 'River-bank wild camping — zero network, pure silence', 'Phuktal Monastery carved dramatically into a cliff face', 'Zanskar River gorge walk at dusk'], stay: 'Tent camping on river bank', budget: '₹10,000' },
+      { day: '7–10', location: 'Spiti Valley', activities: ['Key Monastery perched at 4,166 m altitude', 'Chicham Bridge — Asia\'s highest suspension bridge', 'Pin Valley National Park — snow leopard territory', 'Solo sunrise walk in Pin-Bhaba mountain pass'], stay: 'Zostel Kaza', budget: '₹14,000' },
+      { day: '11–14', location: 'Chitkul', activities: ['Chitkul — India\'s last inhabited village at border', 'Apple and cherry orchard harvest walks', 'River trout fishing in Baspa River', 'Total digital detox — journaling and mountain silence'], stay: 'Himalayan homestay, Chitkul', budget: '₹10,000' },
     ],
   },
   {
@@ -72,15 +72,15 @@ const movies = [
     mood: 'Breezy, iconic, coming-of-age',
     image: 'https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?auto=format&fit=crop&w=1600&q=80',
     color: 'from-sky-500 to-blue-700',
-    destinations: ['Goa', 'Mumbai', 'Ladakh'],
+    destinations: ['Goa', 'Mumbai', 'Lonavala', 'Mahabaleshwar'],
     budget: '₹30,000 – ₹55,000',
     duration: '9 days',
     music: 'Dil Chahta Hai, Jaane Kyun, Kaisi Hai Yeh Rut',
     itinerary: [
-      { day: '1–3', location: 'Goa (North)', activities: ['Calangute and Baga beach sunsets', 'Old Goa Portuguese churches', 'Feni tasting and beach shacks', 'Flea market at Anjuna'], stay: 'Taj Fort Aguada Resort', budget: '₹14,000' },
-      { day: '4–5', location: 'South Goa', activities: ['Palolem beach isolation', 'Dudhsagar waterfalls trek', 'Kayaking through backwaters', 'Silent beach bonfire'], stay: 'Agonda Beach Resort', budget: '₹10,000' },
-      { day: '6–7', location: 'Mumbai', activities: ['Marine Drive night walk', 'Bandra-Worli Sea Link drive', 'Colaba Causeway shopping', 'Gateway of India sunrise'], stay: 'Taj Mahal Palace Mumbai', budget: '₹18,000' },
-      { day: '8–9', location: 'Lonavala & Mahabaleshwar', activities: ['Bhushi Dam monsoon swim', 'Kaas Plateau wildflowers', 'Strawberry farm visits', 'Sunset from Sunset Point'], stay: 'The Machan Lonavala', budget: '₹10,000' },
+      { day: '1–3', location: 'Goa', activities: ['Calangute and Baga beach sunset with feni cocktails', 'Old Goa Portuguese churches and Fort Aguada walk', 'Anjuna Wednesday flea market — silver and spices', 'Beach shack seafood dinner under the stars'], stay: 'Taj Fort Aguada Resort', budget: '₹14,000' },
+      { day: '4–5', location: 'Goa', activities: ['Palolem beach — quiet coves and hammocks', 'Dudhsagar waterfalls full-day trek via jeep', 'Kayaking through Sal River backwaters', 'Silent bonfire night at Agonda beach'], stay: 'Agonda Beach Resort', budget: '₹10,000' },
+      { day: '6–7', location: 'Mumbai', activities: ['Marine Drive night walk — Queen\'s Necklace at 10 PM', 'Bandra-Worli Sea Link drive at dusk', 'Colaba Causeway street shopping and Leopold Cafe', 'Gateway of India at sunrise with fishing boats'], stay: 'Taj Mahal Palace Mumbai', budget: '₹18,000' },
+      { day: '8–9', location: 'Lonavala', activities: ['Bhushi Dam monsoon swim and waterfall chase', 'Kaas Plateau wildflower meadows (seasonal)', 'Strawberry farm visits and fresh cream picking', 'Sunset from Sunset Point — valley panorama'], stay: 'The Machan, Lonavala', budget: '₹10,000' },
     ],
   },
   {
@@ -91,15 +91,15 @@ const movies = [
     mood: 'Vast, silent, otherworldly',
     image: 'https://images.unsplash.com/photo-1504893524553-b855bce32c67?auto=format&fit=crop&w=1600&q=80',
     color: 'from-indigo-700 to-violet-900',
-    destinations: ['Iceland', 'Bolivia', 'Atacama'],
+    destinations: ['Reykjavik', 'Westfjords', 'Salar de Uyuni', 'San Pedro de Atacama'],
     budget: '₹2,50,000 – ₹4,00,000',
     duration: '16 days',
     music: 'Cornfield Chase, No Time for Caution, Stay',
     itinerary: [
-      { day: '1–4', location: 'Iceland', activities: ['Jökulsárlón glacier lagoon', 'Black sand beaches of Reynisfjara', 'Skógafoss waterfall under Northern Lights', 'Thórsmörk volcanic valley'], stay: 'Ion Adventure Hotel', budget: '₹70,000' },
-      { day: '5–7', location: 'Westfjords, Iceland', activities: ['Dynjandi waterfall — Iceland\'s grandest', 'Hornstrandir Nature Reserve hike', 'Hot pot under midnight sun', 'Arctic fox encounters'], stay: 'Remote guesthouse', budget: '₹45,000' },
-      { day: '8–11', location: 'Salar de Uyuni, Bolivia', activities: ['Salt flat sky reflections at sunrise', 'Cactus island at dawn', 'Star trail photography at 3,600m', 'Coloured lagoons and flamingos'], stay: 'Palacio de Sal hotel', budget: '₹65,000' },
-      { day: '12–16', location: 'Atacama Desert, Chile', activities: ['Valle de la Luna at dusk', 'ALMA observatory telescope night', 'El Tatio geysers at sunrise', 'Stargazing at Paranal Observatory'], stay: 'Alto Atacama Desert Lodge', budget: '₹80,000' },
+      { day: '1–4', location: 'Reykjavik', activities: ['Jökulsárlón glacier lagoon — floating ice sculptures', 'Black sand beaches of Reynisfjara at high tide', 'Skógafoss waterfall under Northern Lights', 'Thórsmörk volcanic valley — zero humans, pure earth'], stay: 'Ion Adventure Hotel, Iceland', budget: '₹70,000' },
+      { day: '5–7', location: 'Westfjords', activities: ['Dynjandi waterfall — Iceland\'s most dramatic cascade', 'Hornstrandir Nature Reserve — no roads, pure hiking', 'Geothermal hot pot under the midnight sun', 'Arctic fox den encounters in the wild fjords'], stay: 'Remote Westfjords Guesthouse', budget: '₹45,000' },
+      { day: '8–11', location: 'Salar de Uyuni', activities: ['Mirror-like salt flat sky reflections at dawn', 'Cactus island (Isla Incahuasi) at sunrise', 'Star trail long-exposure photography at 3,600 m', 'Coloured lagoons and flamingo colonies'], stay: 'Palacio de Sal hotel, Uyuni', budget: '₹65,000' },
+      { day: '12–16', location: 'San Pedro de Atacama', activities: ['Valle de la Luna at dusk — Mars-like silence', 'ALMA observatory — world\'s largest radio telescope', 'El Tatio geysers erupting at 5 AM sunrise', 'Stargazing at Paranal Observatory — 8,000 stars visible'], stay: 'Alto Atacama Desert Lodge', budget: '₹80,000' },
     ],
   },
   {
@@ -110,15 +110,15 @@ const movies = [
     mood: 'Tropical, carefree, sun-drenched',
     image: 'https://images.unsplash.com/photo-1519046904884-53103b34b206?auto=format&fit=crop&w=1600&q=80',
     color: 'from-cyan-500 to-teal-700',
-    destinations: ['Andamans', 'Lakshadweep', 'Maldives'],
+    destinations: ['Havelock Island', 'Neil Island', 'Lakshadweep', 'Maldives'],
     budget: '₹60,000 – ₹1,20,000',
     duration: '11 days',
     music: 'Porcelain, Pure Shores, Small Hours',
     itinerary: [
-      { day: '1–3', location: 'Havelock Island, Andamans', activities: ['Radhanagar Beach (Asia\'s best)', 'Snorkelling at Elephant Beach', 'Kayak through mangrove creeks', 'Glass-bottom boat over coral'], stay: 'Jalakara Hotel', budget: '₹18,000' },
-      { day: '4–5', location: 'Neil Island, Andamans', activities: ['Bicycle tour around the island', 'Natural Bridge sunset', 'Night squid fishing with locals', 'Sleeping on the beach'], stay: 'Sea Shell Beach Resort', budget: '₹10,000' },
-      { day: '6–8', location: 'Bangaram, Lakshadweep', activities: ['Uninhabited island drifting', 'Scuba dive on pristine coral', 'Deep sea fishing', 'Bioluminescent beach at night'], stay: 'Bangaram Island Resort', budget: '₹28,000' },
-      { day: '9–11', location: 'Maldives', activities: ['Overwater bungalow stay', 'Manta ray snorkel at Hanifaru Bay', 'Sunset dolphin cruise', 'Sandbank picnic at low tide'], stay: 'Four Seasons Landaa Giraavaru', budget: '₹45,000' },
+      { day: '1–3', location: 'Havelock Island', activities: ['Radhanagar Beach (Asia\'s best) at sunrise — no crowds', 'Snorkelling at Elephant Beach over coral gardens', 'Mangrove creek kayaking — bioluminescent plankton at night', 'Glass-bottom boat ride over living reef'], stay: 'Jalakara Hotel, Havelock', budget: '₹18,000' },
+      { day: '4–5', location: 'Neil Island', activities: ['Bicycle tour around the entire island (8 km loop)', 'Natural Bridge rock formation at low tide sunset', 'Night squid fishing with local fishermen', 'Sleep on the beach under a canopy of stars'], stay: 'Sea Shell Beach Resort, Neil', budget: '₹10,000' },
+      { day: '6–8', location: 'Lakshadweep', activities: ['Uninhabited lagoon island drifting — you and the sea', 'Scuba dive on India\'s most pristine reef system', 'Deep sea fishing for tuna and barracuda', 'Bioluminescent plankton beach walk at midnight'], stay: 'Bangaram Island Resort, Lakshadweep', budget: '₹28,000' },
+      { day: '9–11', location: 'Maldives', activities: ['Overwater bungalow with direct ocean ladder access', 'Manta ray snorkel at Hanifaru Bay biosphere reserve', 'Sunset dolphin cruise through the Indian Ocean', 'Sandbank picnic at low tide — just you and the horizon'], stay: 'Four Seasons Landaa Giraavaru', budget: '₹45,000' },
     ],
   },
 ];
@@ -159,6 +159,20 @@ const DayCard = ({ day }) => (
   </div>
 );
 
+/**
+ * Parse a budget string that may be a range like '₹45,000 – ₹75,000'
+ * or a single value like '₹1,50,000+'.
+ * Returns the highest number found (safe upper-bound for the trip budget).
+ */
+const parseBudgetStr = (str = '') => {
+  const nums = str
+    .split(/[–—]/)
+    .map((p) => parseInt(p.replace(/[^0-9]/g, ''), 10))
+    .filter((n) => n > 0 && !Number.isNaN(n));
+  if (!nums.length) return 50000;
+  return Math.max(...nums);
+};
+
 const MovieItineraryPage = () => {
   const navigate = useNavigate();
   const [selected, setSelected] = useState(movies[0]);
@@ -171,29 +185,55 @@ const MovieItineraryPage = () => {
     setStartingTrip(true);
     try {
       const itinerary = selected.generated_itinerary || selected.itinerary;
+
+      // Build a city-name → id map from the API for accurate city linking
+      let cityMap = {};
+      try {
+        const citiesRes = await api.get('/cities?limit=200');
+        (citiesRes.data.cities ?? []).forEach((c) => {
+          cityMap[c.name.toLowerCase()] = c.id;
+        });
+      } catch { /* proceed without city linking */ }
+
       const response = await api.post('/trips', {
         name: `${selected.title} — Cinematic Trip`,
         description: `A ${selected.duration} journey inspired by ${selected.title} (${selected.year}). Vibe: ${selected.vibe}. Destinations: ${selected.destinations.join(', ')}.`,
         cover_photo_url: selected.image,
-        budget: parseInt(selected.budget.replace(/[^0-9]/g, '')) || 50000,
+        budget: parseBudgetStr(selected.budget),
         is_public: false,
       });
       const tripId = response.data.id;
-      // Create sections from the itinerary
-      for (const day of itinerary) {
+
+      for (const [idx, day] of itinerary.entries()) {
         try {
+          // Determine section type from accommodation type
+          const stayLower = (day.stay || '').toLowerCase();
+          const sectionType =
+            stayLower.includes('camp') || stayLower.includes('tent') ? 'adventure'
+            : stayLower.includes('hostel') || stayLower.includes('zostel') ? 'stay'
+            : 'stay';
+
+          // Look up city_id — try exact name first, then first word of location
+          const locFirst = day.location.split(',')[0].trim().toLowerCase();
+          const cityId = cityMap[locFirst] ?? cityMap[day.location.toLowerCase()] ?? null;
+
+          // Build a clean, structured description:
+          //   "{location} — {hotel} · {act1} · {act2} · {act3} · {act4}"
+          const activitiesPart = day.activities.map((a) => a.trim()).join(' · ');
+          const description = `${day.location} — ${day.stay}${activitiesPart ? ' · ' + activitiesPart : ''}`;
+
           await api.post(`/trips/${tripId}/sections`, {
-            type: 'stay',
-            description: `${day.location} — ${day.activities.join(', ')}`,
-            budget: parseInt((day.budget || '0').replace(/[^0-9]/g, '')) || 0,
-            order_index: itinerary.indexOf(day),
+            type: sectionType,
+            description,
+            budget: parseBudgetStr(day.budget || '0'),
+            city_id: cityId,
+            order_index: idx,
           });
         } catch { /* continue with remaining sections */ }
       }
       navigate(`/trips/${tripId}/view`);
     } catch (err) {
       console.error('Failed to create trip:', err);
-      // Fallback: just navigate to create page
       navigate('/trips/new');
     } finally {
       setStartingTrip(false);

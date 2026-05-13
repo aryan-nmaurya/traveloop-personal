@@ -7,7 +7,7 @@ import { cityDirectory } from '../../data/mockData';
 import { formatCurrency } from '../../utils/formatters';
 
 const ACTIVITY_TYPES = ['All', 'physical', 'cultural', 'food', 'adventure'];
-const MAX_COST_CAP = 10000;
+const MAX_COST_CAP = 50000;
 
 const ActivitySearchPage = () => {
   const [query, setQuery] = useState('');
@@ -144,8 +144,8 @@ const ActivitySearchPage = () => {
             </span>
             <input
               max={MAX_COST_CAP}
-              min="100"
-              step="100"
+              min="500"
+              step="500"
               type="range"
               value={maxCost}
               onChange={(event) => setMaxCost(Number(event.target.value))}

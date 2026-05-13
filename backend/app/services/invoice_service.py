@@ -29,7 +29,7 @@ def get_invoice(db: Session, trip_id: int, user_id: int) -> dict:
             "amount": amount,
         })
 
-    tax_rate = 0.05  # Added a 5% tax rate for better realism
+    tax_rate = 0.05  # 5% GST applicable to Indian tour operators
     tax = round(subtotal * tax_rate, 2)
     discount = 0.0  # Future support for discounts
     total = round(subtotal + tax - discount, 2)

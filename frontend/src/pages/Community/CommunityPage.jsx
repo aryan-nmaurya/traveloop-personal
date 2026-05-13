@@ -1,4 +1,4 @@
-import { ArrowUpDown, Copy, Filter, Search } from 'lucide-react';
+import { ArrowUpDown, Copy, Filter, Search, X } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AppLayout from '../../components/layout/AppLayout';
@@ -6,16 +6,25 @@ import TripCard from '../../components/features/TripCard';
 import api from '../../api/axiosInstance';
 import { Button, EmptyState, PageIntro, PageSection, SearchField, Toolbar } from '../../components/ui/primitives';
 
+const STATUS_FILTERS = [
+  { label: 'All', value: '' },
+  { label: 'Upcoming', value: 'upcoming' },
+  { label: 'Ongoing', value: 'ongoing' },
+  { label: 'Completed', value: 'completed' },
+];
+
 const CommunityPage = () => {
   const navigate = useNavigate();
   const [query, setQuery] = useState('');
   const [sortBy, setSortBy] = useState('popular');
+  const [statusFilter, setStatusFilter] = useState('');
+  const [showFilterPanel, setShowFilterPanel] = useState(false);
   const [trips, setTrips] = useState([]);
   const [copiedTrip, setCopiedTrip] = useState(null);
   const [copying, setCopying] = useState(null);
   const debounceRef = useRef(null);
 
-  const fetchTrips = useCallback(async (q, sort) => {
+  const fetchTrips = useCallback(async (q, sort, status) => {
     try {
       const params = new URLSearchParams({ page: 1, limit: 20 });
       if (q) params.set('q', q);
@@ -26,6 +35,10 @@ const CommunityPage = () => {
       if (sort === 'budget') {
         data = [...data].sort((a, b) => Number(a.budget ?? 0) - Number(b.budget ?? 0));
       }
+      // Apply status filter client-side since the community endpoint doesn't support it natively.
+      if (status) {
+        data = data.filter((t) => t.status === status);
+      }
       setTrips(data);
     } catch {
       // keep existing state
@@ -33,15 +46,15 @@ const CommunityPage = () => {
   }, []);
 
   useEffect(() => {
-    fetchTrips(query, sortBy);
+    fetchTrips(query, sortBy, statusFilter);
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sortBy]);
+  }, [sortBy, statusFilter]);
 
   const handleQueryChange = (event) => {
     const value = event.target.value;
     setQuery(value);
     clearTimeout(debounceRef.current);
-    debounceRef.current = setTimeout(() => fetchTrips(value, sortBy), 300);
+    debounceRef.current = setTimeout(() => fetchTrips(value, sortBy, statusFilter), 300);
   };
 
   const handleCopyTrip = async (trip) => {
@@ -57,6 +70,8 @@ const CommunityPage = () => {
       setCopying(null);
     }
   };
+
+  const activeFilterCount = statusFilter ? 1 : 0;
 
   return (
     <AppLayout>
@@ -75,9 +90,18 @@ const CommunityPage = () => {
               onChange={handleQueryChange}
             />
           </SearchField>
-          <Button className="justify-start lg:min-w-[150px]" variant="secondary">
+          <Button
+            className="justify-start lg:min-w-[150px] relative"
+            variant={showFilterPanel ? 'primary' : 'secondary'}
+            onClick={() => setShowFilterPanel((v) => !v)}
+          >
             <Filter size={16} />
             Filter
+            {activeFilterCount > 0 && (
+              <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-teal-600 text-[10px] font-bold text-white">
+                {activeFilterCount}
+              </span>
+            )}
           </Button>
           <label className="field-shell min-h-14 rounded-full lg:min-w-[220px]">
             <ArrowUpDown className="h-4.5 w-4.5 text-slate-400" />
@@ -88,6 +112,39 @@ const CommunityPage = () => {
             </select>
           </label>
         </Toolbar>
+
+        {showFilterPanel && (
+          <div className="mt-4 rounded-[22px] border border-slate-200/80 bg-slate-50/90 p-4">
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-sm font-semibold text-slate-700">Filter by trip status</p>
+              {statusFilter && (
+                <button
+                  type="button"
+                  className="flex items-center gap-1 text-xs text-slate-500 hover:text-slate-800"
+                  onClick={() => setStatusFilter('')}
+                >
+                  <X size={12} /> Clear
+                </button>
+              )}
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {STATUS_FILTERS.map((f) => (
+                <button
+                  key={f.value}
+                  type="button"
+                  onClick={() => setStatusFilter(f.value)}
+                  className={`rounded-full border px-4 py-2 text-sm font-medium transition ${
+                    statusFilter === f.value
+                      ? 'border-teal-500/40 bg-teal-500/10 text-teal-700'
+                      : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300'
+                  }`}
+                >
+                  {f.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
       </PageSection>
 
       {trips.length ? (

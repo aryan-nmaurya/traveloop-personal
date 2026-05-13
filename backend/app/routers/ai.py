@@ -101,27 +101,31 @@ async def generate_movie_itinerary(request: Request, body: MovieItineraryRequest
     system_prompt = (
         "You are an elite cinematic travel curator who designs immersive, movie-inspired journeys. "
         "Your itineraries perfectly capture the emotional essence, visual aesthetic, and adventurous spirit of each film. "
-        "You include hidden gems, cinematic photo spots, specific hotel names, authentic local experiences, and precise budget breakdowns. "
+        "You include hidden gems, cinematic photo spots, specific hotel names, authentic local experiences, and precise budget breakdowns in INR. "
         "CRITICAL: Your entire response must be ONLY a valid JSON object — no markdown, no explanation, no text before or after the JSON. "
         "The JSON must exactly match this structure:\n"
-        '{"itinerary": [{"day": "1-3", "location": "City, Country", '
-        '"activities": ["Specific activity 1", "Specific activity 2", "Specific activity 3", "Hidden gem or photo spot"], '
-        '"stay": "Specific hotel or accommodation name", "budget": "₹XX,XXX"}]}'
+        '{"itinerary": [{"day": "1-3", "location": "City Name Only", '
+        '"activities": ["Specific named activity 1", "Specific named activity 2", "Specific named activity 3", "Hidden gem or cinematic photo spot"], '
+        '"stay": "Specific hotel or unique accommodation name with city", "budget": "₹XX,XXX"}]}'
+        "\n\nRules: location must be the CITY NAME only (not 'City, Country'). "
+        "Each activity must be specific and named — never say 'explore the city' or 'visit local attractions'. "
+        "Budget must be in Indian Rupees (₹) with realistic INR amounts."
     )
 
     user_prompt = (
         f"Create a cinematic {body.duration} travel itinerary inspired by the movie '{body.movie_title}'.\n"
         f"Film vibe & mood: {body.vibe}\n"
-        f"Key destinations: {destinations_str}\n"
-        f"Total budget: {body.budget}\n\n"
+        f"Key destinations (use exact city names): {destinations_str}\n"
+        f"Total budget (INR): {body.budget}\n\n"
         f"Requirements:\n"
         f"- Capture the EXACT emotional tone and visual atmosphere of the movie\n"
-        f"- Include at least 4 activities per day-block (specific, named experiences — not generic ones)\n"
+        f"- Include exactly 4 activities per segment — all must be specific named experiences (not generic)\n"
         f"- Name specific hotels, guesthouses, or unique stays that match the film's vibe\n"
-        f"- Include at least one hidden gem or cinematic photo spot per segment\n"
-        f"- Split the {body.duration} into {max(3, len(body.destinations))} logical segments across the destinations\n"
-        f"- Budget per segment should sum to approximately {body.budget}\n"
-        f"- Make each activity feel like it could be a scene from the movie\n"
+        f"- Include one hidden gem or cinematic photo spot per segment\n"
+        f"- Split {body.duration} into exactly {max(3, len(body.destinations))} segments, one per destination\n"
+        f"- Each segment budget must be in ₹ INR; all budgets must sum to approximately {body.budget}\n"
+        f"- location field = city name only (e.g. 'Manali', not 'Manali, India')\n"
+        f"- Make every activity feel like a scene from the movie\n"
         f"Return ONLY the JSON object, nothing else."
     )
 

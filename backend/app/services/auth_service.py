@@ -56,7 +56,8 @@ def login_user(db: Session, data: LoginRequest) -> tuple[User, str, str]:
     return user, access_token, refresh_token
 
 
-def refresh_access_token(db: Session, token: str) -> str:
+def refresh_access_token(db: Session, token: str) -> tuple[str, str]:
+    """Validate the refresh token, rotate it, and return new (access_token, refresh_token)."""
     payload = decode_token(token)
     if not payload or payload.get("type") != "refresh":
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid refresh token")
@@ -74,8 +75,14 @@ def refresh_access_token(db: Session, token: str) -> str:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Refresh token expired or revoked")
 
     user_id = payload.get("sub")
+
+    # Revoke the used refresh token (rotation — each token can only be used once).
+    db_token.revoked = True
+    db.commit()
+
     new_access_token = create_access_token({"sub": user_id})
-    return new_access_token
+    new_refresh_token = _store_refresh_token(db, int(user_id))
+    return new_access_token, new_refresh_token
 
 
 def logout_user(db: Session, user_id: int, jti: str | None = None, token_expires_at: datetime | None = None) -> None:

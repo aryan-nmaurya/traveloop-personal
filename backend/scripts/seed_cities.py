@@ -62,36 +62,36 @@ CITIES =[
     {"name": "Maldives", "country": "Maldives", "region": "Asia", "cost_index": 300.00, "popularity_score": 48, "description": "Overwater bungalows, crystal-clear lagoons, and coral reefs.", "image_url": None},
 ]
 
-ACTIVITIES_BY_CITY ={
+ACTIVITIES_BY_CITY = {
     "Paris": [
-        {"name": "Eiffel Tower Visit", "type": "cultural", "cost": 25.00, "duration_minutes": 120, "description": "Visit the iconic iron tower with panoramic city views."},
-        {"name": "Louvre Museum", "type": "cultural", "cost": 17.00, "duration_minutes": 180, "description": "World's largest art museum featuring the Mona Lisa."},
-        {"name": "Seine River Cruise", "type": "adventure", "cost": 15.00, "duration_minutes": 60, "description": "Scenic boat ride along the Seine past Notre-Dame and landmarks."},
-        {"name": "French Cooking Class", "type": "food", "cost": 80.00, "duration_minutes": 180, "description": "Learn to cook croissants and classic French dishes."},
+        {"name": "Eiffel Tower Visit", "type": "cultural", "cost": 2100.00, "duration_minutes": 120, "description": "Visit the iconic iron tower with panoramic city views."},
+        {"name": "Louvre Museum", "type": "cultural", "cost": 1400.00, "duration_minutes": 180, "description": "World's largest art museum featuring the Mona Lisa."},
+        {"name": "Seine River Cruise", "type": "adventure", "cost": 1250.00, "duration_minutes": 60, "description": "Scenic boat ride along the Seine past Notre-Dame and landmarks."},
+        {"name": "French Cooking Class", "type": "food", "cost": 6600.00, "duration_minutes": 180, "description": "Learn to cook croissants and classic French dishes."},
     ],
     "Tokyo": [
         {"name": "Tsukiji Market Tour", "type": "food", "cost": 0.00, "duration_minutes": 120, "description": "Explore the world's famous fish market and taste fresh sushi."},
-        {"name": "Mount Fuji Day Trip", "type": "adventure", "cost": 60.00, "duration_minutes": 480, "description": "Guided day trip to Japan's iconic volcano."},
+        {"name": "Mount Fuji Day Trip", "type": "adventure", "cost": 5000.00, "duration_minutes": 480, "description": "Guided day trip to Japan's iconic volcano."},
         {"name": "Shibuya Crossing Walk", "type": "cultural", "cost": 0.00, "duration_minutes": 30, "description": "Experience the world's busiest pedestrian crossing."},
-        {"name": "Sumo Wrestling Match", "type": "cultural", "cost": 40.00, "duration_minutes": 240, "description": "Watch live sumo wrestling at a tournament."},
+        {"name": "Sumo Wrestling Match", "type": "cultural", "cost": 3300.00, "duration_minutes": 240, "description": "Watch live sumo wrestling at a tournament."},
     ],
     "Rome": [
-        {"name": "Colosseum & Forum Tour", "type": "cultural", "cost": 16.00, "duration_minutes": 150, "description": "Explore the ancient amphitheatre and Roman Forum."},
-        {"name": "Vatican Museums & Sistine Chapel", "type": "cultural", "cost": 20.00, "duration_minutes": 180, "description": "Visit the Pope's museums and Michelangelo's famous ceiling."},
-        {"name": "Pasta Making Class", "type": "food", "cost": 65.00, "duration_minutes": 150, "description": "Learn to make fresh pasta from scratch with a local chef."},
-        {"name": "Vespa Tour", "type": "adventure", "cost": 90.00, "duration_minutes": 180, "description": "Explore Rome on a classic Vespa scooter."},
+        {"name": "Colosseum & Forum Tour", "type": "cultural", "cost": 1350.00, "duration_minutes": 150, "description": "Explore the ancient amphitheatre and Roman Forum."},
+        {"name": "Vatican Museums & Sistine Chapel", "type": "cultural", "cost": 1650.00, "duration_minutes": 180, "description": "Visit the Pope's museums and Michelangelo's famous ceiling."},
+        {"name": "Pasta Making Class", "type": "food", "cost": 5400.00, "duration_minutes": 150, "description": "Learn to make fresh pasta from scratch with a local chef."},
+        {"name": "Vespa Tour", "type": "adventure", "cost": 7500.00, "duration_minutes": 180, "description": "Explore Rome on a classic Vespa scooter."},
     ],
     "Bali": [
-        {"name": "Tanah Lot Sunset", "type": "cultural", "cost": 5.00, "duration_minutes": 120, "description": "Watch the sunset at the iconic ocean temple."},
-        {"name": "Ubud Monkey Forest", "type": "adventure", "cost": 5.00, "duration_minutes": 90, "description": "Wander through sacred forest with playful macaques."},
-        {"name": "Surfing Lesson", "type": "physical", "cost": 30.00, "duration_minutes": 120, "description": "Beginner surfing lesson on Kuta Beach."},
-        {"name": "Balinese Cooking Class", "type": "food", "cost": 35.00, "duration_minutes": 180, "description": "Learn to cook nasi goreng and satay."},
+        {"name": "Tanah Lot Sunset", "type": "cultural", "cost": 420.00, "duration_minutes": 120, "description": "Watch the sunset at the iconic ocean temple."},
+        {"name": "Ubud Monkey Forest", "type": "adventure", "cost": 420.00, "duration_minutes": 90, "description": "Wander through sacred forest with playful macaques."},
+        {"name": "Surfing Lesson", "type": "physical", "cost": 2500.00, "duration_minutes": 120, "description": "Beginner surfing lesson on Kuta Beach."},
+        {"name": "Balinese Cooking Class", "type": "food", "cost": 2900.00, "duration_minutes": 180, "description": "Learn to cook nasi goreng and satay."},
     ],
     "Bangkok": [
-        {"name": "Grand Palace Tour", "type": "cultural", "cost": 15.00, "duration_minutes": 120, "description": "Visit the ornate royal palace and Wat Phra Kaew."},
-        {"name": "Street Food Tour", "type": "food", "cost": 25.00, "duration_minutes": 180, "description": "Guided walking tour of Bangkok's best street food."},
-        {"name": "Muay Thai Class", "type": "physical", "cost": 20.00, "duration_minutes": 90, "description": "Try Thailand's national combat sport with a trainer."},
-        {"name": "Chao Phraya Boat Ride", "type": "adventure", "cost": 5.00, "duration_minutes": 60, "description": "River taxi through Bangkok's waterways."},
+        {"name": "Grand Palace Tour", "type": "cultural", "cost": 1250.00, "duration_minutes": 120, "description": "Visit the ornate royal palace and Wat Phra Kaew."},
+        {"name": "Street Food Tour", "type": "food", "cost": 2100.00, "duration_minutes": 180, "description": "Guided walking tour of Bangkok's best street food."},
+        {"name": "Muay Thai Class", "type": "physical", "cost": 1650.00, "duration_minutes": 90, "description": "Try Thailand's national combat sport with a trainer."},
+        {"name": "Chao Phraya Boat Ride", "type": "adventure", "cost": 420.00, "duration_minutes": 60, "description": "River taxi through Bangkok's waterways."},
     ],
 }
 

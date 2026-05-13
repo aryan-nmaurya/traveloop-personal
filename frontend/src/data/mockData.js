@@ -5,6 +5,14 @@ export const coverFallback =
 
 export const destinationHighlights = [
   {
+    id: 'himalayan-circuit',
+    name: 'Himalayan Circuit',
+    region: 'India',
+    summary: 'Snow peaks, valley camps, desert forts, and lake reflections across North India.',
+    image_url:
+      'https://images.unsplash.com/photo-1626621341517-bbf3d9990a23?auto=format&fit=crop&w=900&q=80',
+  },
+  {
     id: 'mediterranean',
     name: 'Mediterranean Arc',
     region: 'Europe',
@@ -21,6 +29,14 @@ export const destinationHighlights = [
       'https://images.unsplash.com/photo-1515238152791-8216bfdf89a7?auto=format&fit=crop&w=900&q=80',
   },
   {
+    id: 'india-coastal',
+    name: 'India Coastal Trail',
+    region: 'India',
+    summary: 'Goa shacks, Andaman reefs, Kerala backwaters, and Lakshadweep lagoons.',
+    image_url:
+      'https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?auto=format&fit=crop&w=900&q=80',
+  },
+  {
     id: 'tokyo-kyoto',
     name: 'Tokyo to Kyoto',
     region: 'Asia',
@@ -29,16 +45,128 @@ export const destinationHighlights = [
       'https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?auto=format&fit=crop&w=900&q=80',
   },
   {
-    id: 'andes',
-    name: 'Andean Altitudes',
-    region: 'South America',
-    summary: 'Mountain rail journeys, cloud forests, and city breaks with texture.',
+    id: 'rajasthan-royale',
+    name: 'Rajasthan Royale',
+    region: 'India',
+    summary: 'Palace hotels, camel dunes, pink cities, and a thousand years of living history.',
     image_url:
-      'https://images.unsplash.com/photo-1526392060635-9d6019884377?auto=format&fit=crop&w=900&q=80',
+      'https://images.unsplash.com/photo-1524492412937-b28074a5d7da?auto=format&fit=crop&w=900&q=80',
   },
 ];
 
 export const cityDirectory = [
+  // ── Indian destinations ────────────────────────────────────────────────────
+  {
+    id: 'mock-manali',
+    name: 'Manali',
+    country: 'India',
+    region: 'Asia',
+    cost_index: 35,
+    popularity_score: 92,
+    image_url: 'https://images.unsplash.com/photo-1626621341517-bbf3d9990a23?auto=format&fit=crop&w=1000&q=80',
+    description: 'Himalayan hill station with snow-capped peaks, river rafting, and the iconic Rohtang Pass.',
+  },
+  {
+    id: 'mock-udaipur',
+    name: 'Udaipur',
+    country: 'India',
+    region: 'Asia',
+    cost_index: 45,
+    popularity_score: 93,
+    image_url: 'https://images.unsplash.com/photo-1477587458883-47145ed31459?auto=format&fit=crop&w=1000&q=80',
+    description: 'City of Lakes — Lake Pichola, City Palace, rooftop restaurants, and romantic haveli stays.',
+  },
+  {
+    id: 'mock-jaisalmer',
+    name: 'Jaisalmer',
+    country: 'India',
+    region: 'Asia',
+    cost_index: 38,
+    popularity_score: 87,
+    image_url: 'https://images.unsplash.com/photo-1524492412937-b28074a5d7da?auto=format&fit=crop&w=1000&q=80',
+    description: 'The Golden City in the Thar Desert — camel safaris, Sam Sand Dunes, and a living fort.',
+  },
+  {
+    id: 'mock-goa',
+    name: 'Goa',
+    country: 'India',
+    region: 'Asia',
+    cost_index: 50,
+    popularity_score: 95,
+    image_url: 'https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?auto=format&fit=crop&w=1000&q=80',
+    description: "India's beach paradise — Portuguese churches, Anjuna flea markets, and Baga nightlife.",
+  },
+  {
+    id: 'mock-mumbai',
+    name: 'Mumbai',
+    country: 'India',
+    region: 'Asia',
+    cost_index: 65,
+    popularity_score: 91,
+    image_url: 'https://images.unsplash.com/photo-1529253355930-ddbe423a2ac7?auto=format&fit=crop&w=1000&q=80',
+    description: 'Maximum City — Gateway of India, Marine Drive, Bollywood, and world-class street food.',
+  },
+  {
+    id: 'mock-leh',
+    name: 'Leh',
+    country: 'India',
+    region: 'Asia',
+    cost_index: 40,
+    popularity_score: 88,
+    image_url: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?auto=format&fit=crop&w=1000&q=80',
+    description: 'High-altitude capital of Ladakh — monasteries, Pangong Tso lake, and lunar landscapes.',
+  },
+  {
+    id: 'mock-jaipur',
+    name: 'Jaipur',
+    country: 'India',
+    region: 'Asia',
+    cost_index: 42,
+    popularity_score: 90,
+    image_url: 'https://images.unsplash.com/photo-1599661046289-e31897846e41?auto=format&fit=crop&w=1000&q=80',
+    description: 'The Pink City — Amber Fort, Hawa Mahal, gem markets, and Rajasthani cuisine.',
+  },
+  {
+    id: 'mock-rishikesh',
+    name: 'Rishikesh',
+    country: 'India',
+    region: 'Asia',
+    cost_index: 20,
+    popularity_score: 86,
+    image_url: 'https://images.unsplash.com/photo-1582510003544-4d00b7f74220?auto=format&fit=crop&w=1000&q=80',
+    description: 'Yoga capital of the world — Ganges ghats, white-water rafting, and bungee jumping.',
+  },
+  {
+    id: 'mock-varanasi',
+    name: 'Varanasi',
+    country: 'India',
+    region: 'Asia',
+    cost_index: 18,
+    popularity_score: 84,
+    image_url: 'https://images.unsplash.com/photo-1561361058-c24cecae35ca?auto=format&fit=crop&w=1000&q=80',
+    description: 'One of the world\'s oldest living cities — Ganges ghats at dawn, boat rides, and Ganga Aarti.',
+  },
+  {
+    id: 'mock-munnar',
+    name: 'Munnar',
+    country: 'India',
+    region: 'Asia',
+    cost_index: 28,
+    popularity_score: 85,
+    image_url: 'https://images.unsplash.com/photo-1544735716-392fe2489ffa?auto=format&fit=crop&w=1000&q=80',
+    description: "Kerala's tea country — rolling green estates, misty peaks, and elephant sanctuaries.",
+  },
+  {
+    id: 'mock-havelock',
+    name: 'Havelock Island',
+    country: 'India',
+    region: 'Asia',
+    cost_index: 45,
+    popularity_score: 89,
+    image_url: 'https://images.unsplash.com/photo-1519046904884-53103b34b206?auto=format&fit=crop&w=1000&q=80',
+    description: "Radhanagar Beach (Asia's best), snorkelling, mangrove kayaking in the Andaman Islands.",
+  },
+  // ── International ──────────────────────────────────────────────────────────
   {
     id: 1,
     name: 'Kyoto',
@@ -46,8 +174,7 @@ export const cityDirectory = [
     region: 'Asia',
     cost_index: 210,
     popularity_score: 96,
-    image_url:
-      'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?auto=format&fit=crop&w=1000&q=80',
+    image_url: 'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?auto=format&fit=crop&w=1000&q=80',
     description: 'A calm, culture-rich city with gardens, ryokans, and atmospheric evening streets.',
   },
   {
@@ -57,8 +184,7 @@ export const cityDirectory = [
     region: 'Europe',
     cost_index: 160,
     popularity_score: 91,
-    image_url:
-      'https://images.unsplash.com/photo-1513735492246-483525079686?auto=format&fit=crop&w=1000&q=80',
+    image_url: 'https://images.unsplash.com/photo-1513735492246-483525079686?auto=format&fit=crop&w=1000&q=80',
     description: 'Hilltop viewpoints, pastel trams, tiled facades, and excellent food for the price.',
   },
   {
@@ -68,8 +194,7 @@ export const cityDirectory = [
     region: 'Africa',
     cost_index: 130,
     popularity_score: 87,
-    image_url:
-      'https://images.unsplash.com/photo-1597212618440-806262de4f6b?auto=format&fit=crop&w=1000&q=80',
+    image_url: 'https://images.unsplash.com/photo-1597212618440-806262de4f6b?auto=format&fit=crop&w=1000&q=80',
     description: 'Courtyard riads, artisan souks, and desert gateways with a warm palette.',
   },
   {
@@ -79,8 +204,7 @@ export const cityDirectory = [
     region: 'North America',
     cost_index: 240,
     popularity_score: 84,
-    image_url:
-      'https://images.unsplash.com/photo-1501594907352-04cda38ebc29?auto=format&fit=crop&w=1000&q=80',
+    image_url: 'https://images.unsplash.com/photo-1501594907352-04cda38ebc29?auto=format&fit=crop&w=1000&q=80',
     description: 'A polished city base for forests, mountains, design hotels, and waterfront dining.',
   },
   {
@@ -90,8 +214,7 @@ export const cityDirectory = [
     region: 'Asia',
     cost_index: 120,
     popularity_score: 93,
-    image_url:
-      'https://images.unsplash.com/photo-1537996194471-e657df975ab4?auto=format&fit=crop&w=1000&q=80',
+    image_url: 'https://images.unsplash.com/photo-1537996194471-e657df975ab4?auto=format&fit=crop&w=1000&q=80',
     description: 'Tropical villas, surf mornings, lush interiors, and restorative wellness stays.',
   },
   {
@@ -101,8 +224,7 @@ export const cityDirectory = [
     region: 'Europe',
     cost_index: 320,
     popularity_score: 82,
-    image_url:
-      'https://images.unsplash.com/photo-1504893524553-b855bce32c67?auto=format&fit=crop&w=1000&q=80',
+    image_url: 'https://images.unsplash.com/photo-1504893524553-b855bce32c67?auto=format&fit=crop&w=1000&q=80',
     description: 'The launchpad for road trips through black sand beaches, lava fields, and glaciers.',
   },
 ];
@@ -111,68 +233,68 @@ export const activityDirectory = [
   {
     id: 101,
     city_id: 1,
-    name: 'Arashiyama Bamboo Sunrise Walk',
-    description: 'Early-entry guided walk through bamboo groves with a tea stop.',
-    type: 'cultural',
-    cost: 45,
+    name: ‘Arashiyama Bamboo Sunrise Walk’,
+    description: ‘Early-entry guided walk through bamboo groves with a tea stop.’,
+    type: ‘cultural’,
+    cost: 3750,
     duration_minutes: 150,
     image_url:
-      'https://images.unsplash.com/photo-1528360983277-13d401cdc186?auto=format&fit=crop&w=800&q=80',
+      ‘https://images.unsplash.com/photo-1528360983277-13d401cdc186?auto=format&fit=crop&w=800&q=80’,
   },
   {
     id: 102,
     city_id: 2,
-    name: 'Lisbon Sunset Sailing',
-    description: 'A Tagus River cruise with skyline views and local wine pairings.',
-    type: 'relaxation',
-    cost: 75,
+    name: ‘Lisbon Sunset Sailing’,
+    description: ‘A Tagus River cruise with skyline views and local wine pairings.’,
+    type: ‘relaxation’,
+    cost: 6200,
     duration_minutes: 180,
     image_url:
-      'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80',
+      ‘https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80’,
   },
   {
     id: 103,
     city_id: 5,
-    name: 'Ubud Culinary Trail',
-    description: 'A small-group food walk across family kitchens and hidden stalls.',
-    type: 'food',
-    cost: 60,
+    name: ‘Ubud Culinary Trail’,
+    description: ‘A small-group food walk across family kitchens and hidden stalls.’,
+    type: ‘food’,
+    cost: 5000,
     duration_minutes: 210,
     image_url:
-      'https://images.unsplash.com/photo-1552566626-52f8b828add9?auto=format&fit=crop&w=800&q=80',
+      ‘https://images.unsplash.com/photo-1552566626-52f8b828add9?auto=format&fit=crop&w=800&q=80’,
   },
   {
     id: 104,
     city_id: 6,
-    name: 'South Coast Waterfall Expedition',
-    description: 'A full-day photo-forward journey through Iceland’s dramatic coastal route.',
-    type: 'adventure',
-    cost: 145,
+    name: ‘South Coast Waterfall Expedition’,
+    description: ‘A full-day photo-forward journey through Iceland’s dramatic coastal route.’,
+    type: ‘adventure’,
+    cost: 12000,
     duration_minutes: 540,
     image_url:
-      'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=800&q=80',
+      ‘https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=800&q=80’,
   },
   {
     id: 105,
     city_id: 4,
-    name: 'Seawall Bike + Brunch',
-    description: 'A coastal bike circuit capped with a waterfront brunch reservation.',
-    type: 'physical',
-    cost: 55,
+    name: ‘Seawall Bike + Brunch’,
+    description: ‘A coastal bike circuit capped with a waterfront brunch reservation.’,
+    type: ‘physical’,
+    cost: 4600,
     duration_minutes: 180,
     image_url:
-      'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?auto=format&fit=crop&w=800&q=80',
+      ‘https://images.unsplash.com/photo-1517836357463-d25dfeac3438?auto=format&fit=crop&w=800&q=80’,
   },
   {
     id: 106,
     city_id: 3,
-    name: 'Medina Craft Workshop',
-    description: 'Hands-on ceramics and leathercraft inside a restored riad atelier.',
-    type: 'cultural',
-    cost: 35,
+    name: ‘Medina Craft Workshop’,
+    description: ‘Hands-on ceramics and leathercraft inside a restored riad atelier.’,
+    type: ‘cultural’,
+    cost: 2900,
     duration_minutes: 120,
     image_url:
-      'https://images.unsplash.com/photo-1516483638261-f4dbaf036963?auto=format&fit=crop&w=800&q=80',
+      ‘https://images.unsplash.com/photo-1516483638261-f4dbaf036963?auto=format&fit=crop&w=800&q=80’,
   },
 ];
 
@@ -186,7 +308,7 @@ const seedTrips = [
     end_date: '2026-06-24',
     cover_photo_url:
       'https://images.unsplash.com/photo-1500375592092-40eb2168fd21?auto=format&fit=crop&w=1200&q=80',
-    budget: 6800,
+    budget: 565000,
     is_public: true,
     traveler: {
       name: 'Mila Santos',
@@ -204,7 +326,7 @@ const seedTrips = [
         description: 'Three nights in a boutique stay with walking access to tram lines and late dinners.',
         start_date: '2026-06-12',
         end_date: '2026-06-15',
-        budget: 1200,
+        budget: 100000,
       },
       {
         id: '101-2',
@@ -214,7 +336,7 @@ const seedTrips = [
         description: 'One curated sunset sail plus a chef-led route through local taverns.',
         start_date: '2026-06-14',
         end_date: '2026-06-14',
-        budget: 280,
+        budget: 23500,
       },
       {
         id: '101-3',
@@ -224,7 +346,7 @@ const seedTrips = [
         description: 'Reserved train seats with hotel pickup on arrival.',
         start_date: '2026-06-15',
         end_date: '2026-06-15',
-        budget: 180,
+        budget: 15000,
       },
       {
         id: '101-4',
@@ -234,7 +356,7 @@ const seedTrips = [
         description: 'Ocean-facing suite, private breakfast deck, and flexible beach club access.',
         start_date: '2026-06-15',
         end_date: '2026-06-24',
-        budget: 2650,
+        budget: 220000,
       },
     ],
     checklist: [
@@ -270,7 +392,7 @@ const seedTrips = [
     end_date: '2026-04-10',
     cover_photo_url:
       'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?auto=format&fit=crop&w=1200&q=80',
-    budget: 4200,
+    budget: 350000,
     is_public: false,
     traveler: {
       name: 'Noah Bennett',
@@ -288,7 +410,7 @@ const seedTrips = [
         description: 'Tatami suite, kaiseki dinner, and private bath reservations.',
         start_date: '2026-04-04',
         end_date: '2026-04-07',
-        budget: 1600,
+        budget: 133000,
       },
       {
         id: '102-2',
@@ -298,7 +420,7 @@ const seedTrips = [
         description: 'Morning in Gion followed by a tea workshop with a local ceramic artist.',
         start_date: '2026-04-05',
         end_date: '2026-04-05',
-        budget: 240,
+        budget: 20000,
       },
       {
         id: '102-3',
@@ -308,7 +430,7 @@ const seedTrips = [
         description: 'A soft recovery day with a massage and evening onsen session.',
         start_date: '2026-04-08',
         end_date: '2026-04-08',
-        budget: 320,
+        budget: 26600,
       },
     ],
     checklist: [
@@ -335,7 +457,7 @@ const seedTrips = [
     end_date: '2026-09-01',
     cover_photo_url:
       'https://images.unsplash.com/photo-1537996194471-e657df975ab4?auto=format&fit=crop&w=1200&q=80',
-    budget: 3500,
+    budget: 290000,
     is_public: true,
     traveler: {
       name: 'Ava Kim',
@@ -353,7 +475,7 @@ const seedTrips = [
         description: 'Long-stay workspace villa with poolside mornings and a quiet writing nook.',
         start_date: '2026-08-18',
         end_date: '2026-08-25',
-        budget: 1350,
+        budget: 112000,
       },
       {
         id: '103-2',
@@ -363,7 +485,7 @@ const seedTrips = [
         description: 'Hands-on Balinese cooking workshop with ingredients sourced that same morning.',
         start_date: '2026-08-20',
         end_date: '2026-08-20',
-        budget: 90,
+        budget: 7500,
       },
       {
         id: '103-3',
@@ -373,7 +495,7 @@ const seedTrips = [
         description: 'Final coastal stretch for surf lessons, dinners, and a softer social rhythm.',
         start_date: '2026-08-25',
         end_date: '2026-09-01',
-        budget: 980,
+        budget: 81500,
       },
     ],
     checklist: [
@@ -414,7 +536,7 @@ export const communityTrips = [
     end_date: '2026-01-19',
     cover_photo_url:
       'https://images.unsplash.com/photo-1516483638261-f4dbaf036963?auto=format&fit=crop&w=1200&q=80',
-    budget: 5900,
+    budget: 490000,
     is_public: true,
     traveler: {
       name: 'Lucas Meyer',
@@ -435,7 +557,7 @@ export const communityTrips = [
         description: 'Museum district hotel with fjord-facing architecture and short city walks.',
         start_date: '2026-01-11',
         end_date: '2026-01-13',
-        budget: 1100,
+        budget: 91500,
       },
       {
         id: '204-2',
@@ -445,7 +567,7 @@ export const communityTrips = [
         description: 'Scenic windows, reserved seats, and a photo-first pace.',
         start_date: '2026-01-13',
         end_date: '2026-01-13',
-        budget: 210,
+        budget: 17500,
       },
     ],
     checklist: [],
@@ -524,8 +646,8 @@ export const hydrateTrip = (trip) => {
         status: invoiceStatus,
         subtotal: spent,
         tax: Math.round(spent * 0.05),
-        discount: spent > 2500 ? 150 : 0,
-        total: Math.round(spent * 1.05) - (spent > 2500 ? 150 : 0),
+        discount: spent > 200000 ? 5000 : 0,
+        total: Math.round(spent * 1.05) - (spent > 200000 ? 5000 : 0),
         line_items: sections.map((section, index) => ({
           id: `${trip.id}-li-${index + 1}`,
           category: section.type,
@@ -588,7 +710,7 @@ export const createLocalTrip = (payload) => {
             description: 'Your first trip section is ready for itinerary planning.',
             start_date: payload.start_date,
             end_date: payload.end_date,
-            budget: Number(payload.budget ?? 0) * 0.45 || 350,
+            budget: Number(payload.budget ?? 0) * 0.45 || 8000,
           },
         ]
       : [],

@@ -22,7 +22,10 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    // Skip token refresh for auth endpoints — a 401 from /auth/* is intentional.
+    const isAuthRoute = originalRequest.url?.includes('/auth/');
+
+    if (error.response?.status === 401 && !originalRequest._retry && !isAuthRoute) {
       originalRequest._retry = true;
 
       const refreshToken = localStorage.getItem('refresh_token');
@@ -41,9 +44,12 @@ api.interceptors.response.use(
 
         const res = await refreshPromise;
         const newAccessToken = res.data.access_token;
+        const newRefreshToken = res.data.refresh_token;
 
         if (newAccessToken) {
           localStorage.setItem('access_token', newAccessToken);
+          // Store the rotated refresh token if the server issued one.
+          if (newRefreshToken) localStorage.setItem('refresh_token', newRefreshToken);
           api.defaults.headers.common['Authorization'] = `Bearer ${newAccessToken}`;
           originalRequest.headers['Authorization'] = `Bearer ${newAccessToken}`;
           return api(originalRequest);

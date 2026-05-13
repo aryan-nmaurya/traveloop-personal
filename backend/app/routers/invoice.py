@@ -107,7 +107,7 @@ def get_invoice_pdf(
         c.drawString(140 * mm, y, "Subtotal:")
         c.drawString(175 * mm, y, f"₹{invoice['subtotal']:,.2f}")
         y -= 6 * mm
-        c.drawString(140 * mm, y, "Tax:")
+        c.drawString(140 * mm, y, "GST (5%):")
         c.drawString(175 * mm, y, f"₹{invoice['tax']:,.2f}")
         y -= 6 * mm
         c.setFont("Helvetica-Bold", 12)

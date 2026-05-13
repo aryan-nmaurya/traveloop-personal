@@ -10,6 +10,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+from app.core.config import settings
 from app.core.database import engine, Base
 from app.core.limiter import limiter
 import app.models  # noqa: F401 — registers all models with Base.metadata
@@ -43,12 +44,7 @@ app.add_middleware(SecurityHeadersMiddleware)
 # ── CORS ──────────────────────────────────────────────────────────────────────
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5173",
-        "http://127.0.0.1:5173",
-        "http://localhost:3000",
-        "http://127.0.0.1:3000",
-    ],
+    allow_origins=settings.CORS_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

@@ -10,8 +10,9 @@ const TripNotesPage = () => {
   const { id } = useParams();
   const [tripName, setTripName] = useState('Trip');
   const [notes, setNotes] = useState([]);
+  const [sections, setSections] = useState([]);
   const [filter, setFilter] = useState('all');
-  const [draft, setDraft] = useState({ title: '', body: '' });
+  const [draft, setDraft] = useState({ title: '', body: '', section_id: '' });
   const [open, setOpen] = useState(false);
   const [editingNote, setEditingNote] = useState(null);
   const [saving, setSaving] = useState(false);
@@ -31,8 +32,14 @@ const TripNotesPage = () => {
     let cancelled = false;
     const load = async () => {
       try {
-        const tripRes = await api.get(`/trips/${id}`);
-        if (!cancelled) setTripName(tripRes.data.name ?? tripName);
+        const [tripRes, sectionsRes] = await Promise.all([
+          api.get(`/trips/${id}`),
+          api.get(`/trips/${id}/sections`),
+        ]);
+        if (!cancelled) {
+          setTripName(tripRes.data.name ?? tripName);
+          setSections(sectionsRes.data ?? []);
+        }
       } catch { /* trip name stays as default */ }
       if (!cancelled) fetchNotes();
     };
@@ -51,13 +58,15 @@ const TripNotesPage = () => {
     if (!draft.title.trim() && !draft.body.trim()) return;
     setSaving(true);
     try {
+      const payload = { title: draft.title, body: draft.body };
+      if (!editingNote && draft.section_id) payload.section_id = Number(draft.section_id);
       if (editingNote) {
-        await api.put(`/trips/${id}/notes/${editingNote.id}`, { title: draft.title, body: draft.body });
+        await api.put(`/trips/${id}/notes/${editingNote.id}`, payload);
       } else {
-        await api.post(`/trips/${id}/notes`, { title: draft.title, body: draft.body });
+        await api.post(`/trips/${id}/notes`, payload);
       }
       await fetchNotes();
-      setDraft({ title: '', body: '' });
+      setDraft({ title: '', body: '', section_id: '' });
       setEditingNote(null);
       setOpen(false);
     } catch {
@@ -69,7 +78,7 @@ const TripNotesPage = () => {
 
   const handleEdit = (note) => {
     setEditingNote(note);
-    setDraft({ title: note.title ?? '', body: note.body ?? '' });
+    setDraft({ title: note.title ?? '', body: note.body ?? '', section_id: note.section_id ?? '' });
     setOpen(true);
   };
 
@@ -82,7 +91,7 @@ const TripNotesPage = () => {
 
   const handleOpenNew = () => {
     setEditingNote(null);
-    setDraft({ title: '', body: '' });
+    setDraft({ title: '', body: '', section_id: '' });
     setOpen(true);
   };
 
@@ -177,6 +186,21 @@ const TripNotesPage = () => {
                   onChange={(e) => setDraft((c) => ({ ...c, body: e.target.value }))}
                 />
               </FormField>
+              {!editingNote && sections.length > 0 && (
+                <FormField label="Link to a trip stop (optional)">
+                  <select
+                    value={draft.section_id}
+                    onChange={(e) => setDraft((c) => ({ ...c, section_id: e.target.value }))}
+                  >
+                    <option value="">— General note (no stop) —</option>
+                    {sections.map((s) => (
+                      <option key={s.id} value={s.id}>
+                        {s.description?.slice(0, 60) || `Section ${s.order_index + 1}`}
+                      </option>
+                    ))}
+                  </select>
+                </FormField>
+              )}
               <div className="flex flex-wrap gap-3">
                 <Button type="submit" disabled={saving}>{saving ? 'Saving…' : 'Save note'}</Button>
                 <Button variant="secondary" onClick={() => setOpen(false)}>Cancel</Button>

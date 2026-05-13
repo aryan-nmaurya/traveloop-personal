@@ -128,19 +128,26 @@ const ItineraryViewPage = () => {
         ) : viewMode === 'list' ? (
           <div className="space-y-4">
             {sections.map((section, i) => {
-              // Parse location from description (format: "Location — activities")
+              // Parse description: "Location — Hotel · Activity1 · Activity2 · …"
               const descParts = (section.description || '').split(' — ');
               const location = descParts.length > 1 ? descParts[0] : null;
-              const details = descParts.length > 1 ? descParts.slice(1).join(' — ') : section.description;
+              const rawDetails = descParts.length > 1 ? descParts.slice(1).join(' — ') : section.description;
+
+              // If details use ' · ' separators → structured cinematic format
+              const bulletItems = rawDetails.includes(' · ') ? rawDetails.split(' · ') : null;
+              // First bullet = accommodation, rest = activities
+              const accommodation = bulletItems ? bulletItems[0] : null;
+              const activities = bulletItems ? bulletItems.slice(1) : null;
 
               return (
                 <article
                   key={section.id}
-                  className="rounded-[28px] border p-5 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_16px_48px_rgba(15,23,42,0.08)]"
+                  className="rounded-[28px] border p-6 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_16px_48px_rgba(15,23,42,0.08)]"
                   style={{ background: 'var(--card-bg)', borderColor: 'var(--card-border)' }}
                 >
                   <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-                    <div className="flex-1">
+                    <div className="flex-1 min-w-0">
+                      {/* Section type + index */}
                       <div className="flex items-center gap-2 mb-3">
                         <span
                           className="rounded-full px-3 py-1 text-[11px] font-bold uppercase tracking-wider"
@@ -149,25 +156,55 @@ const ItineraryViewPage = () => {
                           {section.type || 'segment'}
                         </span>
                         <span className="text-xs font-semibold" style={{ color: 'var(--text-muted)' }}>
-                          Section {i + 1}
+                          Segment {i + 1}
                         </span>
                       </div>
+
+                      {/* Location heading */}
                       {location && (
-                        <h3 className="text-xl font-bold tracking-tight mb-2" style={{ color: 'var(--text-primary)' }}>
-                          📍 {location}
+                        <h3 className="text-xl font-bold tracking-tight mb-2 flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
+                          <MapPin size={16} style={{ color: 'var(--accent-primary)', flexShrink: 0 }} />
+                          {location}
                         </h3>
                       )}
-                      <p className="text-sm leading-7" style={{ color: 'var(--text-secondary)' }}>
-                        {details}
-                      </p>
+
+                      {/* Accommodation line */}
+                      {accommodation && (
+                        <p className="text-sm font-medium mb-3 flex items-center gap-1.5" style={{ color: 'var(--text-secondary)' }}>
+                          <span>🏨</span>
+                          <span>{accommodation}</span>
+                        </p>
+                      )}
+
+                      {/* Activity bullet list (cinematic format) */}
+                      {activities && activities.length > 0 ? (
+                        <ul className="space-y-1.5">
+                          {activities.map((act, ai) => (
+                            <li key={ai} className="flex items-start gap-2 text-sm" style={{ color: 'var(--text-secondary)' }}>
+                              <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full" style={{ background: 'var(--accent-primary)' }} />
+                              {act}
+                            </li>
+                          ))}
+                        </ul>
+                      ) : (
+                        /* Plain-text description (builder format) */
+                        !accommodation && (
+                          <p className="text-sm leading-7" style={{ color: 'var(--text-secondary)' }}>
+                            {rawDetails}
+                          </p>
+                        )
+                      )}
+
                       {section.start_date && (
-                        <div className="mt-3 flex flex-wrap gap-2">
+                        <div className="mt-4 flex flex-wrap gap-2">
                           <InfoBadge>{formatDateRange(section.start_date, section.end_date)}</InfoBadge>
                         </div>
                       )}
                     </div>
+
+                    {/* Budget chip */}
                     {section.budget > 0 && (
-                      <div className="rounded-[20px] px-5 py-3 text-right" style={{ background: 'var(--surface)' }}>
+                      <div className="shrink-0 rounded-[20px] px-5 py-3 text-right" style={{ background: 'var(--surface)' }}>
                         <p className="text-[10px] uppercase tracking-[0.16em]" style={{ color: 'var(--text-muted)' }}>Budget</p>
                         <p className="mt-1 text-xl font-bold" style={{ color: 'var(--text-primary)' }}>{formatCurrency(section.budget)}</p>
                       </div>
@@ -178,37 +215,84 @@ const ItineraryViewPage = () => {
             })}
           </div>
         ) : (
-          /* Calendar / day-based view */
-          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-            {sections.map((section, i) => {
-              const descParts = (section.description || '').split(' — ');
-              const location = descParts.length > 1 ? descParts[0] : `Segment ${i + 1}`;
-              const activities = descParts.length > 1 ? descParts[1]?.split(', ') : [section.description];
-
-              return (
-                <article
-                  key={section.id}
-                  className="rounded-[24px] border p-5 transition hover:-translate-y-0.5"
-                  style={{ background: 'var(--card-bg)', borderColor: 'var(--card-border)' }}
-                >
-                  <div className="flex items-center justify-between mb-3">
-                    <h3 className="text-lg font-bold" style={{ color: 'var(--text-primary)' }}>📍 {location}</h3>
-                    <span className="text-xs font-bold" style={{ color: 'var(--accent-primary)' }}>
-                      {formatCurrency(section.budget || 0)}
-                    </span>
+          /* Calendar / day-based view — grouped by start_date */
+          (() => {
+            const dateMap = new Map();
+            sections.forEach((section) => {
+              const key = section.start_date || 'Undated';
+              if (!dateMap.has(key)) dateMap.set(key, []);
+              dateMap.get(key).push(section);
+            });
+            const sortedDates = [...dateMap.keys()].sort((a, b) => {
+              if (a === 'Undated') return 1;
+              if (b === 'Undated') return -1;
+              return a.localeCompare(b);
+            });
+            return (
+              <div className="space-y-6">
+                {sortedDates.map((date) => (
+                  <div key={date}>
+                    <p className="mb-3 text-xs font-semibold uppercase tracking-[0.16em]" style={{ color: 'var(--text-muted)' }}>
+                      {date === 'Undated' ? 'No date set' : new Date(date + 'T00:00:00').toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+                    </p>
+                    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                      {dateMap.get(date).map((section) => (
+                        <article
+                          key={section.id}
+                          className="rounded-[24px] border p-5 transition hover:-translate-y-0.5"
+                          style={{ background: 'var(--card-bg)', borderColor: 'var(--card-border)' }}
+                        >
+                          <div className="flex items-center justify-between mb-3">
+                            <span className="text-xs font-semibold uppercase tracking-[0.14em] capitalize px-2.5 py-1 rounded-full" style={{ background: 'var(--accent-soft)', color: 'var(--accent-primary)' }}>
+                              {section.type}
+                            </span>
+                            <span className="text-xs font-bold" style={{ color: 'var(--accent-primary)' }}>
+                              {formatCurrency(section.budget || 0)}
+                            </span>
+                          </div>
+                          {(() => {
+                            const calParts = (section.description || '').split(' — ');
+                            const calLoc = calParts.length > 1 ? calParts[0] : null;
+                            const calRaw = calParts.length > 1 ? calParts.slice(1).join(' — ') : section.description;
+                            const calBullets = calRaw.includes(' · ') ? calRaw.split(' · ') : null;
+                            return (
+                              <>
+                                {calLoc && (
+                                  <p className="text-sm font-bold mb-1 flex items-center gap-1" style={{ color: 'var(--text-primary)' }}>
+                                    <MapPin size={12} style={{ color: 'var(--accent-primary)' }} />
+                                    {calLoc}
+                                  </p>
+                                )}
+                                {calBullets ? (
+                                  <ul className="mt-2 space-y-1">
+                                    {calBullets.map((b, bi) => (
+                                      <li key={bi} className="flex items-start gap-1.5 text-xs" style={{ color: 'var(--text-secondary)' }}>
+                                        <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full" style={{ background: 'var(--accent-primary)' }} />
+                                        {b}
+                                      </li>
+                                    ))}
+                                  </ul>
+                                ) : (
+                                  <p className="mt-2 text-sm leading-6" style={{ color: 'var(--text-secondary)' }}>
+                                    {calRaw}
+                                  </p>
+                                )}
+                              </>
+                            );
+                          })()}
+                          {section.end_date && section.end_date !== section.start_date && (
+                            <p className="mt-3 text-xs" style={{ color: 'var(--text-muted)' }}>
+                              Until {new Date(section.end_date + 'T00:00:00').toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                            </p>
+                          )}
+                        </article>
+                      ))}
+                    </div>
                   </div>
-                  <ul className="space-y-1.5">
-                    {(activities || []).map((act, j) => (
-                      <li key={j} className="flex items-start gap-2 text-sm" style={{ color: 'var(--text-secondary)' }}>
-                        <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full" style={{ background: 'var(--accent-primary)' }} />
-                        {act?.trim()}
-                      </li>
-                    ))}
-                  </ul>
-                </article>
-              );
-            })}
-          </div>
+                ))}
+              </div>
+            );
+          })()
         )}
       </PageSection>
 

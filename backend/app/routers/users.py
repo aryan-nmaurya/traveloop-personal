@@ -71,7 +71,7 @@ def save_destination(
     return {"message": "Saved"}
 
 
-@router.delete("/me/saved-destinations/{city_id}", status_code=200)
+@router.delete("/me/saved-destinations/{city_id}", status_code=204)
 def remove_saved_destination(
     city_id: int,
     current_user: User = Depends(get_current_user),
@@ -85,4 +85,3 @@ def remove_saved_destination(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not saved")
     db.delete(row)
     db.commit()
-    return {"message": "Removed"}

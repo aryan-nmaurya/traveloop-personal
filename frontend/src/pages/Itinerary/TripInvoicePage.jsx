@@ -10,6 +10,7 @@ const TripInvoicePage = () => {
   const { id } = useParams();
   const [trip, setTrip] = useState(null);
   const [invoice, setInvoice] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [markingPaid, setMarkingPaid] = useState(false);
 
   const fetchInvoice = async () => {
@@ -31,6 +32,8 @@ const TripInvoicePage = () => {
         setTrip(tripRes.data);
       } catch {
         // trip stays null → shows EmptyState
+      } finally {
+        if (!cancelled) setLoading(false);
       }
     };
 
@@ -62,6 +65,16 @@ const TripInvoicePage = () => {
       setMarkingPaid(false);
     }
   };
+
+  if (loading) {
+    return (
+      <AppLayout>
+        <div className="flex items-center justify-center py-32">
+          <div className="h-8 w-8 animate-spin rounded-full border-2 border-teal-500 border-t-transparent" />
+        </div>
+      </AppLayout>
+    );
+  }
 
   if (!trip) {
     return (
@@ -149,7 +162,7 @@ const TripInvoicePage = () => {
               <strong className="text-slate-950">{formatCurrency(subtotal)}</strong>
             </div>
             <div className="flex items-center justify-between text-sm text-slate-600">
-              <span>Tax</span>
+              <span>GST (5%)</span>
               <strong className="text-slate-950">{formatCurrency(tax)}</strong>
             </div>
             <div className="flex items-center justify-between text-sm text-slate-600">

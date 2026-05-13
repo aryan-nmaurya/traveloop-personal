@@ -7,7 +7,7 @@ import { useNavigate } from 'react-router-dom';
 import AppLayout from '../../components/layout/AppLayout';
 import { Button, FormField, InfoBadge, PageIntro, PageSection, SectionHeader } from '../../components/ui/primitives';
 import api from '../../api/axiosInstance';
-import { coverFallback, createLocalTrip } from '../../data/mockData';
+import { coverFallback } from '../../data/mockData';
 import { formatCurrency } from '../../utils/formatters';
 import { cn } from '../../utils/cn';
 
@@ -116,6 +116,7 @@ const CreateTripPage = () => {
   const [step, setStep] = useState('country');
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
 
   // Data from backend
@@ -131,7 +132,7 @@ const CreateTripPage = () => {
   // Form data for step 4
   const [formData, setFormData] = useState({
     name: '', startDate: '', endDate: '', description: '',
-    coverPhoto: '', budget: 2400, travelers: 2, isPublic: false,
+    coverPhoto: '', budget: 50000, travelers: 2, isPublic: false,
   });
 
   const completedSteps = useMemo(() => {
@@ -205,6 +206,7 @@ const CreateTripPage = () => {
   const handleSubmit = async (event) => {
     event.preventDefault();
     setSubmitting(true);
+    setSubmitError(null);
     const payload = {
       name: formData.name,
       description: formData.description,
@@ -217,9 +219,8 @@ const CreateTripPage = () => {
     try {
       const response = await api.post('/trips', payload);
       navigate(`/trips/${response.data.id}/build`);
-    } catch {
-      const localTrip = createLocalTrip({ ...payload, destination: selectedCity?.name || '' });
-      navigate(`/trips/${localTrip.id}/build`);
+    } catch (err) {
+      setSubmitError(err.response?.data?.detail || 'Failed to create trip. Please try again.');
     } finally {
       setSubmitting(false);
     }
@@ -384,7 +385,7 @@ const CreateTripPage = () => {
                 <input min="1" name="travelers" onChange={handleChange} type="number" value={formData.travelers} />
               </FormField>
               <FormField icon={PiggyBank} label="Budget target">
-                <input min="0" name="budget" onChange={handleChange} step="100" type="number" value={formData.budget} />
+                <input min="0" name="budget" onChange={handleChange} step="1000" type="number" value={formData.budget} />
               </FormField>
               <FormField className="md:col-span-2" icon={Text} label="Trip brief" shellClassName="items-start rounded-[24px] py-1">
                 <textarea
@@ -398,8 +399,13 @@ const CreateTripPage = () => {
                 <input checked={formData.isPublic} name="isPublic" onChange={handleChange} type="checkbox" />
                 Make this trip public in the community gallery.
               </label>
+              {submitError && (
+                <div className="md:col-span-2 rounded-[18px] border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700">
+                  {submitError}
+                </div>
+              )}
               <div className="md:col-span-2 flex flex-wrap gap-3 pt-2">
-                <Button size="lg" type="submit">{submitting ? 'Creating…' : 'Create trip & build itinerary'} <ArrowRight size={16} /></Button>
+                <Button size="lg" type="submit" disabled={submitting}>{submitting ? 'Creating…' : 'Create trip & build itinerary'} <ArrowRight size={16} /></Button>
                 <Button size="lg" to="/trips" variant="secondary">Cancel</Button>
               </div>
             </form>
